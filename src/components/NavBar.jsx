@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 
-function NavBar({ links }) {
+function NavBar({ links, children }) {
   return (
     <nav className="navbar">
       {links.map((link) => (
@@ -8,6 +8,7 @@ function NavBar({ links }) {
           {link.label}
         </NavLink>
       ))}
+      {children}
     </nav>
   );
 }

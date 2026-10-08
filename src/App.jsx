@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
@@ -5,6 +6,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
 import './App.css';
 
 const profile = {
@@ -41,15 +43,27 @@ const projects = [
 ];
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Apply the theme as a class on the root <html> element.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
   return (
     <>
       <Header name={profile.name} role={profile.role} themeColor="#4f46e5" />
-      <NavBar links={navLinks} />
+      <NavBar links={navLinks}>
+        <button type="button" className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
+          {darkMode ? '☀️ Light' : '🌙 Dark'}
+        </button>
+      </NavBar>
       <main className="container">
         <Routes>
           <Route path="/" element={<Home bio={profile.bio} skills={skills} />} />
           <Route path="/projects" element={<Projects projects={projects} />} />
           <Route path="/contact" element={<Contact email={profile.email} />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
       <Footer name={profile.name} email={profile.email} />
