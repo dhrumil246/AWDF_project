@@ -18,7 +18,11 @@ const navLinks = [
 ];
 
 function App() {
-  const [cars] = useState(initialCars);
+  const [cars, setCars] = useState(initialCars);
+
+  const addCar = (car) => {
+    setCars((prev) => [...prev, { ...car, id: Date.now() }]);
+  };
 
   return (
     <>
@@ -28,7 +32,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home cars={cars} />} />
           <Route path="/cars" element={<Cars cars={cars} />} />
-          <Route path="/add" element={<AddCar />} />
+          <Route path="/add" element={<AddCar onAdd={addCar} />} />
         </Routes>
       </main>
       <Footer appName={APP_NAME} />
