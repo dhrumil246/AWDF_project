@@ -20,14 +20,34 @@ npm run dev
 
 Open http://localhost:5173.
 
+## Tech
+
+- React (Vite)
+- React Router v7 in declarative mode — the same `BrowserRouter` / `Routes` / `Route` / `Link` API as v6. v6 has unpatched security advisories (GHSA-wrjc-x8rr-h8h6), fixed only in v7.18.4+.
+
+## Routes
+
+| Path | Page | Notes |
+|---|---|---|
+| `/` | `Home` | Inventory stats (total / available / sold) |
+| `/cars` | `Cars` | Car cards with a show/hide details toggle |
+| `/add` | `AddCar` | Controlled form with live preview; adds the car and redirects to `/cars` |
+| `*` | `NotFound` | 404 for unknown paths |
+
 ## Component structure
 
 ```
-App.jsx
-├── Header.jsx     title, subtitle (props)
-├── CarList.jsx    cars array (props)
-│   └── CarCard.jsx  one car (props)
-└── Footer.jsx     appName (props)
+main.jsx (BrowserRouter)
+└── App.jsx              cars + notice state
+    ├── Header.jsx       title, subtitle (props)
+    ├── NavBar.jsx       links (props), NavLink
+    ├── Notice.jsx       auto-dismiss message (useEffect + cleanup)
+    ├── <Routes>
+    │   ├── pages/Home.jsx
+    │   ├── pages/Cars.jsx      → CarList.jsx → CarCard.jsx (showDetails state)
+    │   ├── pages/AddCar.jsx    form state → CarCard preview
+    │   └── pages/NotFound.jsx
+    └── Footer.jsx       appName (props)
 ```
 
 Car data lives in `frontend/src/data/cars.js`; components never hardcode content.
@@ -37,3 +57,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | Week | Topic | Status |
 |---|---|---|
 | 1 | React + Vite, component architecture | ✅ |
+| 2 | useState, React Router, controlled forms | ✅ |
