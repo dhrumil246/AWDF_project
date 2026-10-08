@@ -75,3 +75,7 @@
 .card small {
   color: #6b7280;
 }
+
+.navbar a.active {
+  border-bottom: 2px solid currentColor;
+}

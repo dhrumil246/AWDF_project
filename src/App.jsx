@@ -1,9 +1,10 @@
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import About from './components/About';
-import Skills from './components/Skills';
-import Footer from './components/Footer';
 import NavBar from './components/NavBar';
-import Projects from './components/Projects';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Projects from './pages/Projects';
+import Contact from './pages/Contact';
 import './App.css';
 
 const profile = {
@@ -14,9 +15,9 @@ const profile = {
 };
 
 const navLinks = [
-  { href: '#about', label: 'About' },
-  { href: '#skills', label: 'Skills' },
-  { href: '#projects', label: 'Projects' },
+  { to: '/', label: 'Home' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/contact', label: 'Contact' },
 ];
 
 const skills = ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'MongoDB', 'Git'];
@@ -45,9 +46,11 @@ function App() {
       <Header name={profile.name} role={profile.role} themeColor="#4f46e5" />
       <NavBar links={navLinks} />
       <main className="container">
-        <About bio={profile.bio} />
-        <Skills skillList={skills} />
-        <Projects projects={projects} />
+        <Routes>
+          <Route path="/" element={<Home bio={profile.bio} skills={skills} />} />
+          <Route path="/projects" element={<Projects projects={projects} />} />
+          <Route path="/contact" element={<Contact email={profile.email} />} />
+        </Routes>
       </main>
       <Footer name={profile.name} email={profile.email} />
     </>

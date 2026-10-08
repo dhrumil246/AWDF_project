@@ -1,10 +1,12 @@
+import { NavLink } from 'react-router-dom';
+
 function NavBar({ links }) {
   return (
     <nav className="navbar">
       {links.map((link) => (
-        <a key={link.href} href={link.href}>
+        <NavLink key={link.to} to={link.to} end>
           {link.label}
-        </a>
+        </NavLink>
       ))}
     </nav>
   );
