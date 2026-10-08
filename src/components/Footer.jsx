@@ -1,0 +1,14 @@
+const year = new Date().getFullYear();
+
+function Footer({ name, email }) {
+  return (
+    <footer className="footer">
+      <p>
+        Contact: <a href={`mailto:${email}`}>{email}</a>
+      </p>
+      <p>© {year} {name}</p>
+    </footer>
+  );
+}
+
+export default Footer;
