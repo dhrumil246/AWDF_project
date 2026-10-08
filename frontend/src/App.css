@@ -142,3 +142,14 @@
 .stat-label {
   color: var(--muted);
 }
+
+.link-button {
+  font: inherit;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--link);
+  cursor: pointer;
+}
