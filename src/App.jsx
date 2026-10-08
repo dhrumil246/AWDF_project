@@ -3,6 +3,7 @@ import About from './components/About';
 import Skills from './components/Skills';
 import Footer from './components/Footer';
 import NavBar from './components/NavBar';
+import Projects from './components/Projects';
 import './App.css';
 
 const profile = {
@@ -15,9 +16,28 @@ const profile = {
 const navLinks = [
   { href: '#about', label: 'About' },
   { href: '#skills', label: 'Skills' },
+  { href: '#projects', label: 'Projects' },
 ];
 
 const skills = ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js', 'MongoDB', 'Git'];
+
+const projects = [
+  {
+    title: 'Task Manager',
+    description: 'Full stack task management app with authentication.',
+    tech: 'React · Node.js · MongoDB',
+  },
+  {
+    title: 'Weather Dashboard',
+    description: 'Shows the current weather for any city using a public API.',
+    tech: 'JavaScript · OpenWeather API',
+  },
+  {
+    title: 'Library Management System',
+    description: 'Tracks books, members and issue/return records.',
+    tech: 'Java · MySQL',
+  },
+];
 
 function App() {
   return (
@@ -27,6 +47,7 @@ function App() {
       <main className="container">
         <About bio={profile.bio} />
         <Skills skillList={skills} />
+        <Projects projects={projects} />
       </main>
       <Footer name={profile.name} email={profile.email} />
     </>

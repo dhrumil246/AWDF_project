@@ -54,3 +54,24 @@
   text-decoration: none;
   font-weight: 500;
 }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+.card small {
+  color: #6b7280;
+}
