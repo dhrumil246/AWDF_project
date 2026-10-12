@@ -1,0 +1,61 @@
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars
+[{"id":1,"make":"Maruti Suzuki","model":"Swift","year":2022,"fuelType":"Petrol","transmission":"Manual","price":650000,"status":"available"},{"id":2,"make":"Hyundai","model":"Creta","year":2023,"fuelType":"Diesel","transmission":"Automatic","price":1450000,"status":"available"},{"id":3,"make":"Tata","model":"Nexon EV","year":2024,"fuelType":"Electric","transmission":"Automatic","price":1550000,"status":"sold"}]
+[200]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/2
+{"id":2,"make":"Hyundai","model":"Creta","year":2023,"fuelType":"Diesel","transmission":"Automatic","price":1450000,"status":"available"}
+[200]
+
+$ curl -s -i -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia","model":"Seltos","year":2024,"fuelType":"Petrol","transmission":"Automatic","price":1350000}' | grep -iE '^(HTTP|Location)|^\{'
+HTTP/1.1 201 Created
+Location: /cars/4
+{"id":4,"status":"available","make":"Kia","model":"Seltos","year":2024,"fuelType":"Petrol","transmission":"Automatic","price":1350000}
+
+
+$ curl -s -w '
+[%{http_code}]' -X PUT http://localhost:5001/cars/4 -H 'Content-Type: application/json' -d '{"price":1299000,"status":"sold"}'
+{"id":4,"status":"sold","make":"Kia","model":"Seltos","year":2024,"fuelType":"Petrol","transmission":"Automatic","price":1299000}
+[200]
+
+$ curl -s -w '
+[%{http_code}]' -X DELETE http://localhost:5001/cars/4
+{"message":"Car deleted","car":{"id":4,"status":"sold","make":"Kia","model":"Seltos","year":2024,"fuelType":"Petrol","transmission":"Automatic","price":1299000}}
+[200]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/4
+{"error":"Car with id 4 not found"}
+[404]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/abc
+{"error":"Invalid car id: abc"}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia"}'
+{"error":"make and model are required"}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -d 'make=Kia'
+{"error":"Content-Type must be application/json"}
+[415]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{bad json'
+{"error":"Request body is not valid JSON"}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/unknown
+{"error":"Route GET /unknown not found"}
+[404]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/debug/error
+{"error":"Something went wrong"}
+[500]
+

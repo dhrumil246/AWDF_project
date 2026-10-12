@@ -1,0 +1,20 @@
+{
+  "name": "car-details-api",
+  "version": "1.0.0",
+  "description": "REST API for the Car Details Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "private": true
+}

@@ -1,0 +1,35 @@
+Server running on port 5001
+GET / - 2026-10-12T16:21:29.767Z
+GET /cars - 2026-10-12T16:21:39.219Z
+GET /cars/2 - 2026-10-12T16:21:39.229Z
+POST /cars - 2026-10-12T16:21:39.246Z
+PUT /cars/4 - 2026-10-12T16:21:39.257Z
+DELETE /cars/4 - 2026-10-12T16:21:39.267Z
+GET /cars/4 - 2026-10-12T16:21:39.277Z
+GET /cars/abc - 2026-10-12T16:21:39.287Z
+POST /cars - 2026-10-12T16:21:39.297Z
+POST /cars - 2026-10-12T16:21:39.308Z
+SyntaxError: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at JSON.parse (<anonymous>)
+    at parse (node_modules/body-parser/lib/types/json.js:91:21)
+    at node_modules/body-parser/lib/read.js:162:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (node_modules/raw-body/index.js:238:16)
+    at done (node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:519:28)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+GET /unknown - 2026-10-12T16:21:39.329Z
+GET /debug/error - 2026-10-12T16:21:39.339Z
+Error: Deliberate test error
+    at app.js:19:11
+    at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+    at next (node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (node_modules/router/lib/route.js:117:3)
+    at handle (node_modules/router/index.js:435:11)
+    at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+    at node_modules/router/index.js:295:15
+    at processParams (node_modules/router/index.js:582:12)
+    at next (node_modules/router/index.js:291:5)
+    at logger (middleware/logger.js:4:3)
