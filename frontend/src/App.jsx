@@ -7,6 +7,7 @@ import Notice from './components/Notice';
 import Home from './pages/Home';
 import Cars from './pages/Cars';
 import AddCar from './pages/AddCar';
+import Catalog from './pages/Catalog';
 import NotFound from './pages/NotFound';
 import initialCars from './data/cars';
 import './App.css';
@@ -17,6 +18,7 @@ const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/cars', label: 'Cars' },
   { to: '/add', label: 'Add Car' },
+  { to: '/catalog', label: 'Catalog' },
 ];
 
 function App() {
@@ -41,6 +43,7 @@ function App() {
           <Route path="/" element={<Home cars={cars} />} />
           <Route path="/cars" element={<Cars cars={cars} />} />
           <Route path="/add" element={<AddCar onAdd={addCar} />} />
+          <Route path="/catalog" element={<Catalog />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
