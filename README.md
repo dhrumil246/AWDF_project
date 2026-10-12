@@ -7,7 +7,11 @@ Full stack car inventory app built week by week for **ITUE301 – Advanced Web D
 ```
 car-details-management-system/
 ├── frontend/          React (Vite)
-└── docs/lab-journal/  weekly notes, key-question answers, screenshots
+├── backend/           Node.js + Express REST API
+└── docs/
+    ├── lab-journal/   weekly notes, key-question answers, screenshots
+    ├── evidence/      recorded API responses and server logs
+    └── postman/       Postman collection for the API
 ```
 
 ## Run the frontend
@@ -19,6 +23,32 @@ npm run dev
 ```
 
 Open http://localhost:5173.
+
+## Run the backend
+
+```bash
+cd backend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000).
+
+### Endpoints
+
+| Method | Path | Success | Errors |
+|---|---|---|---|
+| GET | `/cars` | 200 list of cars | – |
+| GET | `/cars/:id` | 200 car | 400 invalid id, 404 not found |
+| POST | `/cars` | 201 created car + `Location` header | 400 missing make/model or bad JSON, 415 not JSON |
+| PUT | `/cars/:id` | 200 updated car | 400, 404, 415 |
+| DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 404 |
+| * | unknown route | – | 404 JSON |
+
+Middleware pipeline: `express.json()` → `logger` (method, URL, timestamp) → `/cars` router (`validateId`, `requireJson` per route) → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
+
+Import `docs/postman/car-details-api.postman_collection.json` into Postman or Thunder Client to run every request.
 
 ## Tech
 
@@ -68,3 +98,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 1 | React + Vite, component architecture | ✅ |
 | 2 | useState, React Router, controlled forms | ✅ |
 | 3 | API integration with loading / error states | ✅ |
+| 4 | Express REST API, middleware pipeline | ✅ |
