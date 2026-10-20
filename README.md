@@ -24,7 +24,7 @@ Two terminals — the backend must be running for the frontend to load cars.
 cd backend
 cp .env.example .env   # set MONGO_URI (MongoDB Atlas), JWT_SECRET; CLIENT_URL=http://localhost:5173
 npm install
-npm run seed           # optional: demo user + 6 sample cars (wipes users and cars)
+npm run seed           # optional: demo user + 6 sample cars (wipes users and cars); npm run seed -- 500 adds 500 more
 npm run dev
 ```
 
@@ -104,6 +104,17 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 
 `/`, `/cars`, `/cars/:id/edit` and `/add` are wrapped in `ProtectedRoute`: logged-out users are sent to `/login` and back afterwards. Edit / Mark / Delete only show on cars you listed.
 
+## Caching (Week 9)
+
+`GET /cars` and `GET /cars/:id` are cached in memory with `node-cache` (`backend/cache.js`, TTL 60 s). Every successful POST / PUT / DELETE deletes the affected keys, so the next read always comes from MongoDB. The `X-Cache` response header shows `HIT`, `MISS`, or `BYPASS` (when `DISABLE_CACHE=true`). `GET /debug/cache` shows hit/miss counts (non-production only).
+
+| `GET /cars`, 506 cars | Mean of 10 readings |
+|---|---|
+| Uncached | 13.1 ms |
+| Cached | 2.5 ms (5.3× faster) |
+
+The cache lives in the Node process's memory: it is empty after a restart and is not shared between multiple server instances. See [`docs/lab-journal/week-09.md`](docs/lab-journal/week-09.md).
+
 ## Performance (Week 8)
 
 Routes are code-split with `React.lazy()` + one `<Suspense>` around `<Routes>`: `Cars`, `AddCar`, `EditCar`, `Catalog`, `Login` and `NotFound` are separate chunks downloaded on first visit, and `ModelList` loads only after a make is picked. `CarCard` is wrapped in `memo`.
@@ -162,3 +173,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 6 | Full stack integration (React ↔ Express ↔ MongoDB) | ✅ |
 | 7 | JWT authentication, validation middleware | ✅ |
 | 8 | Lazy loading, code splitting, re-render fix | ✅ |
+| 9 | In-memory caching with node-cache | ✅ |

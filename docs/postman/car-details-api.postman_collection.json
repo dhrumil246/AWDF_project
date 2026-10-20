@@ -346,6 +346,24 @@
             },
             "description": "200 (owner only, else 403)"
           }
+        },
+        {
+          "name": "Cache stats (debug)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/debug/cache",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "debug",
+                "cache"
+              ]
+            },
+            "description": "Hit/miss counters and cached keys (non-production only). Send 'Get all cars' twice and compare the X-Cache response header: MISS then HIT."
+          }
         }
       ]
     },
