@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const formatPrice = (price) => `₹${price.toLocaleString('en-IN')}`;
 
@@ -7,6 +8,8 @@ const formatPrice = (price) => `₹${price.toLocaleString('en-IN')}`;
 function CarCard({ car, onToggleStatus, onDelete }) {
   const [showDetails, setShowDetails] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { user } = useAuth();
+  const canEdit = Boolean(onDelete && user && car.owner?.id === user.id);
 
   const run = async (action) => {
     setBusy(true);
@@ -29,6 +32,7 @@ function CarCard({ car, onToggleStatus, onDelete }) {
         <span className={`badge badge-${car.status}`}>{car.status}</span>
       </div>
       <p className="price">{formatPrice(car.price)}</p>
+      {car.owner?.name && <p className="owner">Listed by {car.owner.id === user?.id ? 'you' : car.owner.name}</p>}
       <button type="button" className="link-button" onClick={() => setShowDetails(!showDetails)}>
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
@@ -44,7 +48,7 @@ function CarCard({ car, onToggleStatus, onDelete }) {
         </>
       )}
 
-      {onDelete && (
+      {canEdit && (
         <div className="card-actions">
           <Link to={`/cars/${car.id}/edit`} className="action">
             Edit

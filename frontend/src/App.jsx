@@ -10,6 +10,9 @@ import AddCar from './pages/AddCar';
 import EditCar from './pages/EditCar';
 import Catalog from './pages/Catalog';
 import NotFound from './pages/NotFound';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
 import { getCars, createCar, updateCar, deleteCar } from './api/cars';
 import './App.css';
 
@@ -23,6 +26,8 @@ const navLinks = [
 ];
 
 function App() {
+  const { user } = useAuth();
+  const userId = user?.id;
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,8 +38,9 @@ function App() {
   const clearNotice = useCallback(() => setNotice(null), []);
   const retry = () => setReloadKey((k) => k + 1);
 
-  // Load cars from the backend on mount (and on Retry).
+  // Load cars from the backend when a user is logged in (and on Retry).
   useEffect(() => {
+    if (!userId) return;
     const controller = new AbortController();
 
     async function load() {
@@ -51,7 +57,7 @@ function App() {
 
     load();
     return () => controller.abort();
-  }, [reloadKey]);
+  }, [reloadKey, userId]);
 
   // Every write updates local state from the server's response, never by
   // assuming success. Create/edit errors are re-thrown so CarForm can show
@@ -90,7 +96,9 @@ function App() {
     }
   };
 
-  const carsProps = { cars, loading, error, onRetry: retry };
+  // After logout, never show the previous user's data.
+  const visibleCars = userId ? cars : [];
+  const carsProps = { cars: visibleCars, loading, error, onRetry: retry };
 
   return (
     <>
@@ -99,13 +107,39 @@ function App() {
       <main className="container">
         <Notice notice={notice} onClose={clearNotice} />
         <Routes>
-          <Route path="/" element={<Home {...carsProps} />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home {...carsProps} />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/cars"
-            element={<Cars {...carsProps} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />}
+            element={
+              <ProtectedRoute>
+                <Cars {...carsProps} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/cars/:id/edit" element={<EditCar cars={cars} loading={loading} onUpdate={handleUpdate} />} />
-          <Route path="/add" element={<AddCar onAdd={handleAdd} />} />
+          <Route
+            path="/cars/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditCar cars={visibleCars} loading={loading} onUpdate={handleUpdate} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add"
+            element={
+              <ProtectedRoute>
+                <AddCar onAdd={handleAdd} />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/login" element={<Login />} />
           <Route path="/catalog" element={<Catalog />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,6 +1,9 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function NavBar({ links }) {
+  const { user, logout } = useAuth();
+
   return (
     <nav className="navbar">
       {links.map((link) => (
@@ -8,6 +11,18 @@ function NavBar({ links }) {
           {link.label}
         </NavLink>
       ))}
+      <span className="navbar-user">
+        {user ? (
+          <>
+            <span className="muted">Hi, {user.name}</span>
+            <button type="button" className="action" onClick={logout}>
+              Log out
+            </button>
+          </>
+        ) : (
+          <NavLink to="/login">Log in</NavLink>
+        )}
+      </span>
     </nav>
   );
 }
