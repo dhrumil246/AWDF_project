@@ -28,21 +28,36 @@ Open http://localhost:5173.
 
 ```bash
 cd backend
-cp .env.example .env
+cp .env.example .env   # then set MONGO_URI to your MongoDB Atlas connection string
 npm install
+npm run seed           # optional: load 6 sample cars
 npm run dev
 ```
 
-The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000).
+The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000). The server refuses to start if `MONGO_URI` is missing.
+
+### Car schema (`backend/models/Car.js`)
+
+| Field | Type | Rules |
+|---|---|---|
+| `make`, `model` | String | required, trimmed |
+| `year` | Number | required, 1950 – next year |
+| `price` | Number | required, ≥ 0 |
+| `fuelType` | String | `Petrol` \| `Diesel` \| `CNG` \| `Electric` \| `Hybrid`, default `Petrol` |
+| `transmission` | String | `Manual` \| `Automatic`, default `Manual` |
+| `status` | String | `available` \| `sold`, default `available` |
+| `registrationNumber` | String | optional, unique, stored without spaces in upper case |
+| `description` | String | optional, max 500 chars |
+| `createdAt`, `updatedAt` | Date | automatic (`timestamps: true`) |
 
 ### Endpoints
 
 | Method | Path | Success | Errors |
 |---|---|---|---|
-| GET | `/cars` | 200 list of cars | – |
-| GET | `/cars/:id` | 200 car | 400 invalid id, 404 not found |
-| POST | `/cars` | 201 created car + `Location` header | 400 missing make/model or bad JSON, 415 not JSON |
-| PUT | `/cars/:id` | 200 updated car | 400, 404, 415 |
+| GET | `/cars` | 200 list of cars (newest first) | – |
+| GET | `/cars/:id` | 200 car | 400 invalid ObjectId, 404 not found |
+| POST | `/cars` | 201 created car + `Location` header | 400 validation (per-field `details`) or bad JSON, 409 duplicate registration, 415 not JSON |
+| PUT | `/cars/:id` | 200 updated car (validators run on update) | 400, 404, 409, 415 |
 | DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 404 |
 | * | unknown route | – | 404 JSON |
 
@@ -99,3 +114,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 2 | useState, React Router, controlled forms | ✅ |
 | 3 | API integration with loading / error states | ✅ |
 | 4 | Express REST API, middleware pipeline | ✅ |
+| 5 | MongoDB + Mongoose schema and validation | ✅ |

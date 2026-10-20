@@ -1,12 +1,17 @@
 {
   "info": {
-    "name": "Car Details API \u2014 Week 4",
+    "name": "Car Details API",
+    "description": "Run 'Create car' first: it stores the new id in {{carId}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:5001"
+    },
+    {
+      "key": "carId",
+      "value": ""
     }
   ],
   "item": [
@@ -31,24 +36,6 @@
           }
         },
         {
-          "name": "Get car by id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/cars/2",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "cars",
-                "2"
-              ]
-            },
-            "description": "200"
-          }
-        },
-        {
           "name": "Create car",
           "request": {
             "method": "POST",
@@ -67,16 +54,46 @@
                 "cars"
               ]
             },
-            "description": "201 + Location header",
+            "description": "201 + Location header; saves id to {{carId}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Seltos\",\n  \"year\": 2024,\n  \"fuelType\": \"Petrol\",\n  \"transmission\": \"Automatic\",\n  \"price\": 1350000\n}",
+              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Seltos\",\n  \"year\": 2024,\n  \"fuelType\": \"Petrol\",\n  \"transmission\": \"Automatic\",\n  \"price\": 1350000,\n  \"registrationNumber\": \"GJ 01 KZ 4321\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('carId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get car by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars/{{carId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "{{carId}}"
+              ]
+            },
+            "description": "200"
           }
         },
         {
@@ -90,13 +107,13 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/cars/4",
+              "raw": "{{baseUrl}}/cars/{{carId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "cars",
-                "4"
+                "{{carId}}"
               ]
             },
             "description": "200",
@@ -117,13 +134,13 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cars/4",
+              "raw": "{{baseUrl}}/cars/{{carId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "cars",
-                "4"
+                "{{carId}}"
               ]
             },
             "description": "200"
@@ -140,13 +157,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cars/999",
+              "raw": "{{baseUrl}}/cars/aaaaaaaaaaaaaaaaaaaaaaaa",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "cars",
-                "999"
+                "aaaaaaaaaaaaaaaaaaaaaaaa"
               ]
             },
             "description": "404"
@@ -158,13 +175,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cars/abc",
+              "raw": "{{baseUrl}}/cars/123",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "cars",
-                "abc"
+                "123"
               ]
             },
             "description": "400 (validateId)"
@@ -189,10 +206,103 @@
                 "cars"
               ]
             },
-            "description": "400",
+            "description": "400 with per-field details",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"make\": \"Kia\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Invalid values",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "400: min year, negative price, enum",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Sonet\",\n  \"year\": 1900,\n  \"price\": -5,\n  \"fuelType\": \"Steam\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Wrong type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "400: year must be a number",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Carens\",\n  \"year\": \"abc\",\n  \"price\": 1100000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Duplicate registration number",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "409 (GJ01AB1234 exists in seed data)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Carens\",\n  \"year\": 2024,\n  \"price\": 1100000,\n  \"registrationNumber\": \"GJ01AB1234\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
