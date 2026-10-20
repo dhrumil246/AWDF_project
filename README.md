@@ -104,6 +104,16 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 
 `/`, `/cars`, `/cars/:id/edit` and `/add` are wrapped in `ProtectedRoute`: logged-out users are sent to `/login` and back afterwards. Edit / Mark / Delete only show on cars you listed.
 
+## Background events (Week 10)
+
+`backend/events/carEvents.js` is a single `EventEmitter` (Node's built-in `events` module, no message queue). After `POST /cars` the controller sends the 201 response **first**, then emits `car-created`; `DELETE /cars/:id` emits `car-deleted`. Listeners in `backend/events/listeners.js` (registered once in `server.js`) log a notification after a simulated `NOTIFY_DELAY_MS` (default 2000 ms). An `error` listener catches failures inside async listeners (`captureRejections: true`), so a broken notification never crashes the API.
+
+```bash
+npm run check:events   # asserts emit() is non-blocking and listener errors are caught
+```
+
+Recorded run: the client got its 201 in 9.8 ms; the notification finished 2 s later ([`docs/evidence/w10-event-timestamps.txt`](docs/evidence/w10-event-timestamps.txt)).
+
 ## Caching (Week 9)
 
 `GET /cars` and `GET /cars/:id` are cached in memory with `node-cache` (`backend/cache.js`, TTL 60 s). Every successful POST / PUT / DELETE deletes the affected keys, so the next read always comes from MongoDB. The `X-Cache` response header shows `HIT`, `MISS`, or `BYPASS` (when `DISABLE_CACHE=true`). `GET /debug/cache` shows hit/miss counts (non-production only).
@@ -174,3 +184,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 7 | JWT authentication, validation middleware | ✅ |
 | 8 | Lazy loading, code splitting, re-render fix | ✅ |
 | 9 | In-memory caching with node-cache | ✅ |
+| 10 | Event-driven background processing (EventEmitter) | ✅ |
