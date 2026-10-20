@@ -22,9 +22,9 @@ Two terminals — the backend must be running for the frontend to load cars.
 
 ```bash
 cd backend
-cp .env.example .env   # set MONGO_URI (MongoDB Atlas); CLIENT_URL=http://localhost:5173
+cp .env.example .env   # set MONGO_URI (MongoDB Atlas), JWT_SECRET; CLIENT_URL=http://localhost:5173
 npm install
-npm run seed           # optional: 6 sample cars
+npm run seed           # optional: demo user + 6 sample cars (wipes users and cars)
 npm run dev
 ```
 
@@ -37,11 +37,17 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173.
+Open http://localhost:5173 and log in. After `npm run seed` there is a demo account (test data only): **demo@cars.test / demo12345**, or create your own with "Create an account".
 
 ## Backend
 
-The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000). The server refuses to start if `MONGO_URI` is missing.
+The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000). The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing.
+
+### Authentication
+
+- `POST /auth/register` and `POST /auth/login` return `{ token, user }`. Passwords are hashed with bcrypt (10 salt rounds) and never returned.
+- The token is a JWT signed with `JWT_SECRET`, valid for `JWT_EXPIRES_IN` (default 1h). Send it as `Authorization: Bearer <token>`.
+- **All `/cars` routes require a token.** Any logged-in user can read every car; only the user who listed a car (`owner`) can update or delete it.
 
 ### Car schema (`backend/models/Car.js`)
 
@@ -61,14 +67,21 @@ The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is t
 
 | Method | Path | Success | Errors |
 |---|---|---|---|
+| POST | `/auth/register` | 201 `{ token, user }` | 400 validation, 409 email exists |
+| POST | `/auth/login` | 200 `{ token, user }` | 400 validation, 401 invalid email or password |
+| GET | `/auth/me` | 200 current user | 401 |
 | GET | `/cars` | 200 list of cars (newest first) | – |
 | GET | `/cars/:id` | 200 car | 400 invalid ObjectId, 404 not found |
 | POST | `/cars` | 201 created car + `Location` header | 400 validation (per-field `details`) or bad JSON, 409 duplicate registration, 415 not JSON |
-| PUT | `/cars/:id` | 200 updated car (validators run on update) | 400, 404, 409, 415 |
-| DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 404 |
+| PUT | `/cars/:id` | 200 updated car (validators run on update) | 400, 403 not owner, 404, 409, 415 |
+| DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 403 not owner, 404 |
+
+Every `/cars` route also returns **401** without a valid token (missing, invalid, tampered or expired).
 | * | unknown route | – | 404 JSON |
 
-Middleware pipeline: `cors` (origins from `CLIENT_URL`) → `express.json()` → `logger` (method, URL, timestamp) → `/cars` router (`validateId`, `requireJson` per route) → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
+Middleware pipeline: `cors` (origins from `CLIENT_URL`) → `express.json()` → `logger` (method, URL, timestamp) → routers → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
+
+Per `/cars` request: `auth` (JWT → `req.user`) → `validateId` → `requireJson` → `validateCreateCar` / `validateUpdateCar` (400 before any database call) → controller (ownership check → 403).
 
 Import `docs/postman/car-details-api.postman_collection.json` into Postman or Thunder Client to run every request.
 
@@ -81,6 +94,7 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 
 | Path | Page | Notes |
 |---|---|---|
+| `/login` | `Login` | Log in or create an account |
 | `/` | `Home` | Inventory stats (total / available / sold) from the API |
 | `/cars` | `Cars` | Cars from the API with Edit, Mark sold/available and Delete (with confirm) |
 | `/cars/:id/edit` | `EditCar` | Same `CarForm`, pre-filled; saves with `PUT /cars/:id` |
@@ -88,9 +102,13 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 | `/catalog` | `Catalog` | Car makes and models fetched live from the public [NHTSA vPIC API](https://vpic.nhtsa.dot.gov/api/) (no key needed) |
 | `*` | `NotFound` | 404 for unknown paths |
 
+`/`, `/cars`, `/cars/:id/edit` and `/add` are wrapped in `ProtectedRoute`: logged-out users are sent to `/login` and back afterwards. Edit / Mark / Delete only show on cars you listed.
+
 ## Frontend ↔ backend
 
-`frontend/src/api/cars.js` is the only file that knows the backend URL (`VITE_API_URL`). It exposes `getCars`, `createCar`, `updateCar`, `deleteCar` and throws an `Error` carrying the API's message and per-field `details` on any non-2xx response.
+`frontend/src/api/client.js` is the only file that knows the backend URL (`VITE_API_URL`). It adds `Authorization: Bearer <token>` to every request and throws an `Error` carrying the API's message and per-field `details` on any non-2xx response. A 401 logs the user out (session expired). `api/cars.js` and `api/auth.js` build on it.
+
+`context/AuthContext.jsx` holds the token and user (persisted in `localStorage`), checks a stored token with `GET /auth/me` on load, and exposes `login`, `register`, `logout`.
 
 `App.jsx` loads cars once on mount (loading / error / Retry) and, after every write, updates state **from the server's response** — never optimistically.
 
@@ -104,7 +122,7 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 ## Component structure
 
 ```
-main.jsx (BrowserRouter)
+main.jsx (BrowserRouter → AuthProvider)
 └── App.jsx              cars, loading, error, notice state; CRUD handlers → api/cars.js
     ├── Header.jsx       title, subtitle (props)
     ├── NavBar.jsx       links (props), NavLink
@@ -131,3 +149,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 4 | Express REST API, middleware pipeline | ✅ |
 | 5 | MongoDB + Mongoose schema and validation | ✅ |
 | 6 | Full stack integration (React ↔ Express ↔ MongoDB) | ✅ |
+| 7 | JWT authentication, validation middleware | ✅ |

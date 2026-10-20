@@ -1,13 +1,27 @@
 {
   "info": {
     "name": "Car Details API",
-    "description": "Run 'Create car' first: it stores the new id in {{carId}}.",
+    "description": "Run 'Auth > Login (demo)' first: it stores the JWT in {{token}}, which every other request sends as Bearer auth. 'Create car' stores the new id in {{carId}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:5001"
+    },
+    {
+      "key": "token",
+      "value": ""
     },
     {
       "key": "carId",
@@ -16,7 +30,194 @@
   ],
   "item": [
     {
-      "name": "CRUD",
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "201 + token; 409 if the email exists",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ravi Shah\",\n  \"email\": \"ravi@example.com\",\n  \"password\": \"secret123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logged in', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.collectionVariables.set('token', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (demo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "200 + token (demo user from npm run seed)",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@cars.test\",\n  \"password\": \"demo12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('logged in', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.collectionVariables.set('token', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "200 current user"
+          }
+        },
+        {
+          "name": "Login wrong password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "401",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@cars.test\",\n  \"password\": \"wrongpass\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Register invalid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "400 with details",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"not-an-email\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cars",
       "item": [
         {
           "name": "Get all cars",
@@ -116,7 +317,7 @@
                 "{{carId}}"
               ]
             },
-            "description": "200",
+            "description": "200 (owner only, else 403)",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"price\": 1299000,\n  \"status\": \"sold\"\n}",
@@ -143,7 +344,7 @@
                 "{{carId}}"
               ]
             },
-            "description": "200"
+            "description": "200 (owner only, else 403)"
           }
         }
       ]
@@ -151,6 +352,51 @@
     {
       "name": "Error cases",
       "item": [
+        {
+          "name": "No token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "401 Authentication required",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "Invalid token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer not.a.token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "401 Invalid token",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
         {
           "name": "Car not found",
           "request": {
@@ -206,7 +452,7 @@
                 "cars"
               ]
             },
-            "description": "400 with per-field details",
+            "description": "400 from validation middleware",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"make\": \"Kia\"\n}",
@@ -237,10 +483,10 @@
                 "cars"
               ]
             },
-            "description": "400: min year, negative price, enum",
+            "description": "400: blank make, year not a number, negative price, bad status",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Sonet\",\n  \"year\": 1900,\n  \"price\": -5,\n  \"fuelType\": \"Steam\"\n}",
+              "raw": "{\n  \"make\": \"  \",\n  \"model\": \"Sonet\",\n  \"year\": \"2024\",\n  \"price\": -1,\n  \"status\": \"stolen\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -250,28 +496,24 @@
           }
         },
         {
-          "name": "Wrong type",
+          "name": "Empty update",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "method": "PUT",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cars",
+              "raw": "{{baseUrl}}/cars/{{carId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "cars"
+                "cars",
+                "{{carId}}"
               ]
             },
-            "description": "400: year must be a number",
+            "description": "400: provide at least one field",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Carens\",\n  \"year\": \"abc\",\n  \"price\": 1100000\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
