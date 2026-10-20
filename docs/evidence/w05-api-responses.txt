@@ -1,0 +1,75 @@
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars | python3 -c "import sys;d=sys.stdin.read().rsplit('
+',1);import json;c=json.loads(d[0]);print(len(c),'cars; first:',json.dumps(c[0]));print(d[1])"
+6 cars; first: {"make": "Maruti Suzuki", "model": "Swift", "year": 2022, "price": 650000, "fuelType": "Petrol", "transmission": "Manual", "status": "available", "registrationNumber": "GJ01AB1234", "createdAt": "2026-10-20T08:48:42.970Z", "updatedAt": "2026-10-20T08:48:42.970Z", "id": "6ad72aeac9f12f84c00fa6a9"}
+[200]
+
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/6ad72aeac9f12f84c00fa6aa
+{"make":"Hyundai","model":"Creta","year":2023,"price":1450000,"fuelType":"Diesel","transmission":"Automatic","status":"available","registrationNumber":"GJ05CD5678","createdAt":"2026-10-20T08:48:42.970Z","updatedAt":"2026-10-20T08:48:42.970Z","id":"6ad72aeac9f12f84c00fa6aa"}
+[200]
+
+$ curl -s -i -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"  Kia ","model":"Seltos","year":2024,"price":1350000,"transmission":"Automatic","registrationNumber":"gj 01 kz 4321"}' | grep -iE '^(HTTP|Location)|^\{'
+HTTP/1.1 201 Created
+Location: /cars/6ad72aff3ed5626e37d6e06b
+{"make":"Kia","model":"Seltos","year":2024,"price":1350000,"fuelType":"Petrol","transmission":"Automatic","status":"available","registrationNumber":"GJ01KZ4321","createdAt":"2026-10-20T08:49:03.166Z","updatedAt":"2026-10-20T08:49:03.166Z","id":"6ad72aff3ed5626e37d6e06b"}
+
+
+$ curl -s -w '
+[%{http_code}]' -X PUT http://localhost:5001/cars/6ad72aff3ed5626e37d6e06b -H 'Content-Type: application/json' -d '{"price":1299000,"status":"sold"}'
+{"make":"Kia","model":"Seltos","year":2024,"price":1299000,"fuelType":"Petrol","transmission":"Automatic","status":"sold","registrationNumber":"GJ01KZ4321","createdAt":"2026-10-20T08:49:03.166Z","updatedAt":"2026-10-20T08:49:03.208Z","id":"6ad72aff3ed5626e37d6e06b"}
+[200]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia"}'
+{"error":"Validation failed","details":{"price":"price is required","year":"year is required","model":"model is required"}}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia","model":"Sonet","year":1900,"price":-5,"fuelType":"Steam"}'
+{"error":"Validation failed","details":{"year":"year must be 1950 or later","price":"price cannot be negative","fuelType":"Steam is not a valid fuelType"}}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X PUT http://localhost:5001/cars/6ad72aff3ed5626e37d6e06b -H 'Content-Type: application/json' -d '{"status":"stolen"}'
+{"error":"Validation failed","details":{"status":"stolen is not a valid status"}}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia","model":"Carens","year":2024,"price":1100000,"registrationNumber":"GJ01KZ4321"}'
+{"error":"A car with this registrationNumber already exists"}
+[409]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia","model":"Carens","year":"abc","price":1100000}'
+{"error":"Validation failed","details":{"year":"Cast to Number failed for value \"abc\" (type string) at path \"year\" for model \"Car\""}}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/123
+{"error":"Invalid car id: 123"}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/aaaaaaaaaaaaaaaaaaaaaaaa
+{"error":"Car with id aaaaaaaaaaaaaaaaaaaaaaaa not found"}
+[404]
+
+$ curl -s -w '
+[%{http_code}]' -X DELETE http://localhost:5001/cars/6ad72aff3ed5626e37d6e06b
+{"message":"Car deleted","car":{"make":"Kia","model":"Seltos","year":2024,"price":1299000,"fuelType":"Petrol","transmission":"Automatic","status":"sold","registrationNumber":"GJ01KZ4321","createdAt":"2026-10-20T08:49:03.166Z","updatedAt":"2026-10-20T08:49:03.208Z","id":"6ad72aff3ed5626e37d6e06b"}}
+[200]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars/6ad72aff3ed5626e37d6e06b
+{"error":"Car with id 6ad72aff3ed5626e37d6e06b not found"}
+[404]
+
+$ # after restarting the server (data must still be there)
+$ curl -s http://localhost:5001/cars | count
+6 cars
+
+$ curl -s -X POST http://localhost:5001/cars -H 'Content-Type: application/json' -d '{"make":"Kia","model":"Carens","year":"abc","price":1100000}'
+{"error":"Validation failed","details":{"year":"year must be a number"}}
+[400]
