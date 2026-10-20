@@ -1,0 +1,12 @@
+Week 8 baseline — BEFORE lazy loading (production build served by `vite preview`, gzip on)
+
+JS requested on first load (performance.getEntriesByType('resource'), encodedBodySize = bytes over the wire):
+
+| Route visited | JS files loaded | Bytes (gzip) |
+|---|---|---|
+| /cars (logged in) | index-B_9PN_Rr.js | 86,437 |
+| /catalog | index-B_9PN_Rr.js (same file) | 86,437 |
+| /login | index-B_9PN_Rr.js (same file) | 86,437 |
+
+Every page — including Login, Add Car, Edit Car and Catalog code the user may never open — is in one bundle that must download before anything renders.
+Load timings on localhost are ~17 ms and cached, so they are not a meaningful comparison; the byte counts are.

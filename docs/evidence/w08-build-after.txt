@@ -1,0 +1,23 @@
+
+> frontend@0.0.0 build
+> vite build
+
+vite v8.3.3 building client environment for production...
+transforming...
+✓ 48 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                      0.47 kB │ gzip:  0.30 kB
+dist/assets/index-WxUgkKDN.css       4.92 kB │ gzip:  1.50 kB
+dist/assets/AddCar-CWxmwY8A.js       0.25 kB │ gzip:  0.21 kB
+dist/assets/NotFound-Ci3JEg9F.js     0.32 kB │ gzip:  0.24 kB
+dist/assets/Cars-O3yP8uGL.js         0.70 kB │ gzip:  0.38 kB
+dist/assets/ModelList-BOtTPkD0.js    0.79 kB │ gzip:  0.48 kB
+dist/assets/EditCar-DpwXnOJs.js      0.82 kB │ gzip:  0.45 kB
+dist/assets/CarCard-CzDZZn52.js      1.69 kB │ gzip:  0.75 kB
+dist/assets/Login-Bd_FX1G8.js        1.90 kB │ gzip:  0.85 kB
+dist/assets/Catalog-DRqfgvdI.js      2.33 kB │ gzip:  1.15 kB
+dist/assets/CarForm-BDd1uea6.js      3.41 kB │ gzip:  1.19 kB
+dist/assets/index-DCDFnl6d.js      267.32 kB │ gzip: 85.03 kB
+
+✓ built in 118ms

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { getCarMakes } from '../api/nhtsa';
 import Spinner from '../components/Spinner';
 import ErrorMessage from '../components/ErrorMessage';
-import ModelList from '../components/ModelList';
+
+// Only needed after the user picks a make, so it is loaded on demand.
+const ModelList = lazy(() => import('../components/ModelList'));
 
 function Catalog() {
   const [makes, setMakes] = useState([]);
@@ -79,7 +81,9 @@ function Catalog() {
 
       {selectedMake && (
         <div className="models">
-          <ModelList make={selectedMake} />
+          <Suspense fallback={<Spinner label="Loading models..." />}>
+            <ModelList make={selectedMake} />
+          </Suspense>
         </div>
       )}
     </section>

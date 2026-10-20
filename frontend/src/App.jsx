@@ -1,20 +1,25 @@
-import { useCallback, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import NavBar from './components/NavBar';
 import Footer from './components/Footer';
 import Notice from './components/Notice';
-import Home from './pages/Home';
-import Cars from './pages/Cars';
-import AddCar from './pages/AddCar';
-import EditCar from './pages/EditCar';
-import Catalog from './pages/Catalog';
-import NotFound from './pages/NotFound';
-import Login from './pages/Login';
+import Spinner from './components/Spinner';
 import ProtectedRoute from './components/ProtectedRoute';
+import Home from './pages/Home';
 import { useAuth } from './context/AuthContext';
 import { getCars, createCar, updateCar, deleteCar } from './api/cars';
 import './App.css';
+
+// Route-based code splitting: each page below becomes its own chunk that is
+// downloaded only when its route is first visited. Home stays in the main
+// bundle because it is the landing page.
+const Cars = lazy(() => import('./pages/Cars'));
+const AddCar = lazy(() => import('./pages/AddCar'));
+const EditCar = lazy(() => import('./pages/EditCar'));
+const Catalog = lazy(() => import('./pages/Catalog'));
+const Login = lazy(() => import('./pages/Login'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const APP_NAME = 'Car Details Management System';
 
@@ -75,7 +80,10 @@ function App() {
     setNotice({ type: 'success', message: `${updated.make} ${updated.model} updated.` });
   };
 
-  const handleToggleStatus = async (car) => {
+  // useCallback keeps these references stable between renders so memo(CarCard)
+  // can skip cards whose car did not change. They only use functional state
+  // updates, so they have no dependencies.
+  const handleToggleStatus = useCallback(async (car) => {
     try {
       const status = car.status === 'available' ? 'sold' : 'available';
       const updated = await updateCar(car.id, { status });
@@ -84,9 +92,9 @@ function App() {
     } catch (err) {
       setNotice({ type: 'error', message: `Could not update status: ${err.message}` });
     }
-  };
+  }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = useCallback(async (id) => {
     try {
       const { car } = await deleteCar(id);
       setCars((prev) => prev.filter((c) => c.id !== id));
@@ -94,7 +102,7 @@ function App() {
     } catch (err) {
       setNotice({ type: 'error', message: `Could not delete car: ${err.message}` });
     }
-  };
+  }, []);
 
   // After logout, never show the previous user's data.
   const visibleCars = userId ? cars : [];
@@ -106,43 +114,45 @@ function App() {
       <NavBar links={navLinks} />
       <main className="container">
         <Notice notice={notice} onClose={clearNotice} />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home {...carsProps} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cars"
-            element={
-              <ProtectedRoute>
-                <Cars {...carsProps} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/cars/:id/edit"
-            element={
-              <ProtectedRoute>
-                <EditCar cars={visibleCars} loading={loading} onUpdate={handleUpdate} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add"
-            element={
-              <ProtectedRoute>
-                <AddCar onAdd={handleAdd} />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<Spinner label="Loading page..." />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home {...carsProps} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cars"
+              element={
+                <ProtectedRoute>
+                  <Cars {...carsProps} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cars/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <EditCar cars={visibleCars} loading={loading} onUpdate={handleUpdate} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add"
+              element={
+                <ProtectedRoute>
+                  <AddCar onAdd={handleAdd} />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/login" element={<Login />} />
+            <Route path="/catalog" element={<Catalog />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </main>
       <Footer appName={APP_NAME} />
     </>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -65,4 +65,6 @@ function CarCard({ car, onToggleStatus, onDelete }) {
   );
 }
 
-export default CarCard;
+// memo: skip re-rendering a card when its props (car, handlers) are unchanged,
+// e.g. when only the toast in App changes.
+export default memo(CarCard);

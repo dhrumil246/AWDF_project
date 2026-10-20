@@ -1,0 +1,17 @@
+Week 8 — AFTER lazy loading (production build served by `vite preview`, gzip on)
+
+Fresh load of "/" (logged in), then clicking through the NavBar.
+Files from performance.getEntriesByType('resource'); bytes = encodedBodySize (gzip, over the wire).
+
+| Step | New JS downloaded | Bytes |
+|---|---|---|
+| Load / (Home) | index-DlTz0g6u.js (main bundle only) | 84,158 |
+| Click Cars | Cars-U8l0N0iU.js + CarCard-B84QGIka.js | 702 + 745 |
+| Click Add Car | AddCar-DRUb2Ia6.js + CarForm-COiajmu5.js | 255 + 1,194 |
+| Click Catalog | Catalog-DFWPhKPg.js | 1,155 |
+| Pick make "KIA" | ModelList-C6EKyvuB.js (lazy component, not a route) | 795 |
+
+Initial JS before: 86,437 bytes (one bundle with every page)
+Initial JS after:  84,158 bytes (Home + shared code only)
+Saved on first load: 2,279 bytes (~2.6 %). The rest of each page's code downloads only if and when that page is opened.
+CarForm and CarCard became shared chunks automatically because two lazy pages import them.
