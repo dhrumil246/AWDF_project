@@ -6,6 +6,7 @@ Full stack car inventory app built week by week for **ITUE301 – Advanced Web D
 
 ```
 car-details-management-system/
+├── .github/workflows/ci.yml  lint → test → build → Docker images
 ├── docker-compose.yml frontend + backend + mongodb
 ├── frontend/          React (Vite), Dockerfile, nginx.conf
 ├── backend/           Node.js + Express REST API, Dockerfile
@@ -14,6 +15,20 @@ car-details-management-system/
     ├── evidence/      recorded API responses and server logs
     └── postman/       Postman collection for the API
 ```
+
+## Tests and CI (Week 12)
+
+```bash
+cd backend
+npm test        # 15 API tests: Node's built-in test runner + supertest + in-memory MongoDB
+npm run lint    # oxlint
+```
+
+`.github/workflows/ci.yml` runs on every push and pull request to `main`, every Monday on a schedule, and on demand:
+
+1. **Backend** — `npm ci` → lint → tests (`JWT_SECRET` from the repository secret)
+2. **Frontend** — `npm ci` → lint → production build
+3. **Docker** — builds both images, only if 1 and 2 passed
 
 ## Run everything with Docker (recommended)
 
@@ -205,3 +220,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 9 | In-memory caching with node-cache | ✅ |
 | 10 | Event-driven background processing (EventEmitter) | ✅ |
 | 11 | Docker + Docker Compose | ✅ |
+| 12 | Automated tests + GitHub Actions CI | ✅ |
