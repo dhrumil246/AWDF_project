@@ -400,3 +400,24 @@
 .auth .notice {
   margin-top: 0;
 }
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-button {
+  font-weight: 500;
+}
+
+.ai-note {
+  margin: -4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.ai-note-warn {
+  color: #92400e;
+}

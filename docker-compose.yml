@@ -24,6 +24,8 @@ services:
       MONGO_URI: mongodb://mongodb:27017/cardb
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env next to docker-compose.yml}
       CLIENT_URL: http://localhost:5173
+      # Optional: without it the AI button reports that suggestions are unavailable.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     ports:
       - "5001:5000" # host 5001 (macOS AirPlay uses 5000) → container 5000
     depends_on:

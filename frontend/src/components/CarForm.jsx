@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import CarCard from './CarCard';
+import { generateDescription } from '../api/ai';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -29,6 +30,8 @@ function CarForm({ title, initialCar, submitLabel, onSubmit }) {
   const [form, setForm] = useState(initialCar ? toForm(initialCar) : emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
+  // AI suggestion state: 'idle' | 'loading' | 'done' | 'unavailable'
+  const [ai, setAi] = useState({ status: 'idle', message: '' });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -42,6 +45,31 @@ function CarForm({ title, initialCar, submitLabel, onSubmit }) {
     year >= 1950 &&
     year <= CURRENT_YEAR + 1 &&
     price > 0;
+
+  const canAskAi = form.make.trim() !== '' && form.model.trim() !== '' && ai.status !== 'loading';
+
+  const handleGenerate = async () => {
+    setAi({ status: 'loading', message: '' });
+    try {
+      const result = await generateDescription({
+        make: form.make.trim(),
+        model: form.model.trim(),
+        year: Number(form.year) || undefined,
+        fuelType: form.fuelType,
+        transmission: form.transmission,
+      });
+      if (result.fallback) {
+        setAi({ status: 'unavailable', message: result.message });
+      } else {
+        // Put the suggestion in the textarea; the user can still edit or delete it.
+        setForm((prev) => ({ ...prev, description: result.description }));
+        setAi({ status: 'done', message: '' });
+      }
+    } catch (err) {
+      // e.g. 429 rate limit or network error: the form keeps working without AI
+      setAi({ status: 'unavailable', message: err.message });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,9 +158,25 @@ function CarForm({ title, initialCar, submitLabel, onSubmit }) {
           </label>
         </div>
         <label>
-          Description (optional)
-          <textarea name="description" rows={3} maxLength={500} value={form.description} onChange={handleChange} />
+          <span className="label-row">
+            Description (optional)
+            <button type="button" className="action ai-button" onClick={handleGenerate} disabled={!canAskAi}>
+              {ai.status === 'loading' ? 'Generating...' : '✨ Generate with AI'}
+            </button>
+          </span>
+          <textarea
+            name="description"
+            rows={4}
+            maxLength={500}
+            value={form.description}
+            onChange={handleChange}
+            placeholder={canAskAi || form.make ? '' : 'Enter make and model to get an AI suggestion'}
+          />
         </label>
+        {ai.status === 'done' && (
+          <p className="ai-note">AI-generated suggestion — review and edit it before saving.</p>
+        )}
+        {ai.status === 'unavailable' && <p className="ai-note ai-note-warn">{ai.message}</p>}
 
         <button type="submit" className="button" disabled={!isValid || submitting}>
           {submitting ? 'Saving...' : submitLabel}

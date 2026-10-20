@@ -1,0 +1,19 @@
+# Week 13 — failure path with a deliberately invalid GEMINI_API_KEY (backend container)
+
+$ curl -X POST /api/ai/generate-description -H 'Authorization: Bearer <token>' -d '{"make":"Kia","model":"Seltos","year":2024}'
+{"description":"","fallback":true,"message":"AI suggestion is unavailable right now. You can write the description yourself."}
+[200] in 0.345650s
+
+$ same request again immediately (rate limit)
+HTTP/1.1 429 Too Many Requests
+Retry-After: 10
+{"error":"Please wait 10s before asking the AI again"}
+
+$ the rest of the app still works: GET /cars
+[200]
+
+$ no token
+{"error":"Authentication required"} [401]
+
+# Server log (the real reason is logged server-side only)
+[AI] description failed: Gemini responded 400: API key not valid. Please pass a valid API key.
