@@ -1,0 +1,15 @@
+Week 8 post-lab — unnecessary re-render (dev server, React StrictMode on, so each render is counted twice)
+
+Method: a temporary counter `window.__cardRenders++` at the top of CarCard (removed after measuring).
+On /cars with 8 cards (logged in as the demo user): reset the counter, click "Mark sold" on one card,
+wait 0.8 s, read the counter; wait 3.5 s more for the toast to auto-dismiss, read again.
+
+| Version | Renders after "Mark sold" | Extra renders when the toast disappears |
+|---|---|---|
+| Before (plain CarCard, inline handlers) | 18 | 16 (all 8 cards x2, nothing about them changed) |
+| After (memo(CarCard) + useCallback handlers) | 4 (only the clicked card: busy on/off) | 0 |
+
+Cause: `App` re-renders whenever `notice` changes. It created new `handleToggleStatus` / `handleDelete`
+functions on every render and passed them to every card, so every card re-rendered.
+Fix: `export default memo(CarCard)` and `useCallback(..., [])` for both handlers (they only use
+functional state updates, so they need no dependencies).

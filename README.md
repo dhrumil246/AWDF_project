@@ -104,6 +104,17 @@ Import `docs/postman/car-details-api.postman_collection.json` into Postman or Th
 
 `/`, `/cars`, `/cars/:id/edit` and `/add` are wrapped in `ProtectedRoute`: logged-out users are sent to `/login` and back afterwards. Edit / Mark / Delete only show on cars you listed.
 
+## Performance (Week 8)
+
+Routes are code-split with `React.lazy()` + one `<Suspense>` around `<Routes>`: `Cars`, `AddCar`, `EditCar`, `Catalog`, `Login` and `NotFound` are separate chunks downloaded on first visit, and `ModelList` loads only after a make is picked. `CarCard` is wrapped in `memo`.
+
+| | Before | After |
+|---|---|---|
+| JS chunks | 1 (277.10 kB, 87.33 kB gzip) | main 267.32 kB (85.03 kB gzip) + 9 small on-demand chunks |
+| JS downloaded to open `/` | 86,437 B | 84,158 B |
+
+Details: [`docs/lab-journal/week-08.md`](docs/lab-journal/week-08.md).
+
 ## Frontend ↔ backend
 
 `frontend/src/api/client.js` is the only file that knows the backend URL (`VITE_API_URL`). It adds `Authorization: Bearer <token>` to every request and throws an `Error` carrying the API's message and per-field `details` on any non-2xx response. A 401 logs the user out (session expired). `api/cars.js` and `api/auth.js` build on it.
@@ -150,3 +161,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 5 | MongoDB + Mongoose schema and validation | ✅ |
 | 6 | Full stack integration (React ↔ Express ↔ MongoDB) | ✅ |
 | 7 | JWT authentication, validation middleware | ✅ |
+| 8 | Lazy loading, code splitting, re-render fix | ✅ |
