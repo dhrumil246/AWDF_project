@@ -3,6 +3,7 @@ const cors = require('cors');
 const logger = require('./middleware/logger');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
+const authRouter = require('./routes/auth');
 const carsRouter = require('./routes/cars');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(logger);
 
 app.get('/', (req, res) => res.json({ message: 'Car Details API is running' }));
+app.use('/auth', authRouter);
 app.use('/cars', carsRouter);
 
 // Demo route to show the global error handler catching a thrown error.

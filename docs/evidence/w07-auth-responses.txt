@@ -1,0 +1,96 @@
+# --- Register / login ---
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/register -H 'Content-Type: application/json' -d '{"name":"Ravi Shah","email":"Ravi@Example.com","password":"secret123"}' | sed -E 's/"token":"[^"]+"/"token":"<jwt>"/'
+{"token":"<jwt>","user":{"name":"Ravi Shah","email":"ravi@example.com","createdAt":"2026-10-20T09:00:18.207Z","updatedAt":"2026-10-20T09:00:18.207Z","id":"6ad72da272d837e17e2cf62a"}}
+[201]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/register -H 'Content-Type: application/json' -d '{"name":"Ravi","email":"ravi@example.com","password":"secret123"}'
+{"error":"An account with this email already exists"}
+[409]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/register -H 'Content-Type: application/json' -d '{"name":"","email":"not-an-email","password":"123"}'
+{"error":"Validation failed","details":{"name":"name is required","email":"email must be a valid email address","password":"password must be at least 8 characters"}}
+[400]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/login -H 'Content-Type: application/json' -d '{"email":"ravi@example.com","password":"wrongpass"}'
+{"error":"Invalid email or password"}
+[401]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/login -H 'Content-Type: application/json' -d '{"email":"nobody@example.com","password":"secret123"}'
+{"error":"Invalid email or password"}
+[401]
+
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/auth/login -H 'Content-Type: application/json' -d '{"email":"ravi@example.com","password":"secret123"}' | sed -E 's/"token":"[^"]+"/"token":"<jwt>"/'
+{"token":"<jwt>","user":{"name":"Ravi Shah","email":"ravi@example.com","createdAt":"2026-10-20T09:00:18.207Z","updatedAt":"2026-10-20T09:00:18.207Z","id":"6ad72da272d837e17e2cf62a"}}
+[200]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/auth/me -H 'Authorization: Bearer <ravi token>'
+{"name":"Ravi Shah","email":"ravi@example.com","createdAt":"2026-10-20T09:00:18.207Z","updatedAt":"2026-10-20T09:00:18.207Z","id":"6ad72da272d837e17e2cf62a"}
+[200]
+
+# --- Protected routes ---
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars
+{"error":"Authentication required"}
+[401]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars -H 'Authorization: Bearer not.a.token'
+{"error":"Invalid token"}
+[401]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars -H 'Authorization: Bearer <demo token with the last 5 signature characters changed>'
+{"error":"Invalid token"}
+[401]
+
+$ curl -s -w '
+[%{http_code}]' http://localhost:5001/cars -H 'Authorization: Bearer <expired token>'
+{"error":"Token expired, please log in again"}
+[401]
+
+$ curl -s http://localhost:5001/cars -H 'Authorization: Bearer <ravi token>' | count
+6 cars, first owner: {'name': 'Demo Dealer', 'id': '6ad72d772b27521348a194fe'}
+[200]
+
+# --- Validation middleware (before the database) ---
+$ curl -s -w '
+[%{http_code}]' -X POST http://localhost:5001/cars -H 'Authorization: Bearer <ravi token>' -H 'Content-Type: application/json' -d '{"make":"Kia"}'
+{"error":"Validation failed","details":{"model":"model is required","year":"year is required","price":"price is required"}}
+[400]
+
+$ POST /cars {make:'  ', model:'Sonet', year:'2024', price:-1, status:'stolen'}
+{"error":"Validation failed","details":{"make":"make is required","year":"year must be a number between 1950 and 2027","price":"price must be a number between 0 and 1000000000","status":"status must be one of: available, sold"}}
+[400]
+
+$ PUT /cars/<id> {}
+{"error":"Validation failed","details":{"body":"Provide at least one field to update"}}
+[400]
+
+# --- Ownership (403) ---
+$ POST /cars as Ravi
+{"make":"Kia","model":"Sonet","year":2024,"price":900000,"fuelType":"Petrol","transmission":"Manual","status":"available","owner":{"name":"Ravi Shah","id":"6ad72da272d837e17e2cf62a"},"createdAt":"2026-10-20T09:00:18.671Z","updatedAt":"2026-10-20T09:00:18.671Z","id":"6ad72da272d837e17e2cf62c"}
+[201]
+
+$ PUT /cars/<Creta, owned by Demo Dealer> as Ravi
+{"error":"You can only modify cars you listed"}
+[403]
+
+$ DELETE /cars/<Creta> as Ravi
+{"error":"You can only modify cars you listed"}
+[403]
+
+$ PUT /cars/<Creta> as Demo Dealer (owner)
+{"make":"Hyundai","model":"Creta","year":2023,"price":1399000,"fuelType":"Diesel","transmission":"Automatic","status":"available","registrationNumber":"GJ05CD5678","owner":{"name":"Demo Dealer","id":"6ad72d772b27521348a194fe"},"createdAt":"2026-10-20T08:59:35.893Z","updatedAt":"2026-10-20T09:00:18.704Z","id":"6ad72d772b27521348a19500"}
+[200]
+
+$ POST /cars with owner in body (ignored)
+{"make":"Kia","model":"Carens","year":2024,"price":1100000,"fuelType":"Petrol","transmission":"Manual","status":"available","owner":{"name":"Ravi Shah","id":"6ad72da272d837e17e2cf62a"},"createdAt":"2026-10-20T09:00:18.717Z","updatedAt":"2026-10-20T09:00:18.717Z","id":"6ad72da272d837e17e2cf62d"}
+[201]
+

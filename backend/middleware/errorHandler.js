@@ -24,10 +24,12 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ error: `Invalid value for ${err.path}` });
   }
 
-  // Unique index violation (duplicate registrationNumber).
+  // Unique index violation (duplicate registrationNumber or email).
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue || {})[0] || 'field';
-    return res.status(409).json({ error: `A car with this ${field} already exists` });
+    const field = Object.keys(err.keyValue || {})[0];
+    const message =
+      field === 'email' ? 'An account with this email already exists' : `A car with this ${field || 'value'} already exists`;
+    return res.status(409).json({ error: message });
   }
 
   console.error(err.stack);

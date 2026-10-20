@@ -36,6 +36,8 @@ const carSchema = new mongoose.Schema(
       set: (v) => (v ? v.replace(/\s+/g, '').toUpperCase() : undefined),
     },
     description: { type: String, trim: true, maxlength: [500, 'description is limited to 500 characters'] },
+    // The user who listed the car; only they may update or delete it.
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: true, // adds createdAt and updatedAt
