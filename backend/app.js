@@ -5,6 +5,7 @@ const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 const authRouter = require('./routes/auth');
 const carsRouter = require('./routes/cars');
+const aiRouter = require('./routes/ai');
 const { cache } = require('./cache');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(logger);
 app.get('/', (req, res) => res.json({ message: 'Car Details API is running' }));
 app.use('/auth', authRouter);
 app.use('/cars', carsRouter);
+app.use('/api/ai', aiRouter);
 
 // Demo route to show the global error handler catching a thrown error.
 if (process.env.NODE_ENV !== 'production') {

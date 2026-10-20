@@ -172,3 +172,97 @@ describe('cars', () => {
     assert.equal(res.status, 400);
   });
 });
+
+describe('ai descriptions', () => {
+  const realFetch = globalThis.fetch;
+  const body = { make: 'Kia', model: 'Seltos', year: 2024, fuelType: 'Petrol', registrationNumber: 'GJ01KZ4321' };
+
+  // Replace fetch with a fake Gemini; records what the server sent.
+  function fakeGemini(response) {
+    const calls = [];
+    globalThis.fetch = async (url, options) => {
+      calls.push({ url, options });
+      if (response instanceof Error) throw response;
+      return new Response(JSON.stringify(response.json), { status: response.status });
+    };
+    return calls;
+  }
+
+  beforeEach(() => {
+    process.env.GEMINI_API_KEY = 'test-key';
+  });
+
+  after(() => {
+    globalThis.fetch = realFetch;
+    delete process.env.GEMINI_API_KEY;
+  });
+
+  const post = (token, payload = body) =>
+    request(app).post('/api/ai/generate-description').set('Authorization', `Bearer ${token}`).send(payload);
+
+  it('requires a token', async () => {
+    const res = await request(app).post('/api/ai/generate-description').send(body);
+    assert.equal(res.status, 401);
+  });
+
+  it('rejects a request without a model with 400', async () => {
+    const token = await registerUser();
+    const res = await post(token, { make: 'Kia' });
+    assert.equal(res.status, 400);
+  });
+
+  it('returns the generated description and sends no personal data to Gemini', async () => {
+    const calls = fakeGemini({
+      status: 200,
+      json: { candidates: [{ content: { parts: [{ text: 'A compact SUV with a refined petrol engine.' }] } }] },
+    });
+    const token = await registerUser('Demo Dealer', 'demo@cars.test');
+    const res = await post(token);
+
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body, { description: 'A compact SUV with a refined petrol engine.', fallback: false });
+
+    assert.equal(calls.length, 1);
+    assert.match(calls[0].url, /:generateContent$/);
+    assert.equal(calls[0].options.headers['x-goog-api-key'], 'test-key'); // key in a header, not the URL
+    const sent = calls[0].options.body;
+    assert.match(sent, /Kia/);
+    assert.doesNotMatch(sent, /GJ01KZ4321/); // registration number is not shared
+    assert.doesNotMatch(sent, /demo@cars\.test|Demo Dealer/); // nor the user's identity
+  });
+
+  it('falls back gracefully when Gemini fails', async () => {
+    fakeGemini({ status: 500, json: { error: { message: 'internal' } } });
+    const token = await registerUser();
+    const res = await post(token);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.fallback, true);
+    assert.equal(res.body.description, '');
+  });
+
+  it('falls back gracefully on a network error or timeout', async () => {
+    fakeGemini(new DOMException('The operation was aborted due to timeout', 'TimeoutError'));
+    const token = await registerUser();
+    const res = await post(token);
+    assert.equal(res.status, 200);
+    assert.equal(res.body.fallback, true);
+  });
+
+  it('falls back gracefully when no API key is configured', async () => {
+    delete process.env.GEMINI_API_KEY;
+    const calls = fakeGemini({ status: 200, json: {} });
+    const token = await registerUser();
+    const res = await post(token);
+    assert.equal(res.body.fallback, true);
+    assert.equal(calls.length, 0); // never calls Gemini without a key
+  });
+
+  it('rate-limits a second request from the same user with 429', async () => {
+    fakeGemini({ status: 200, json: { candidates: [{ content: { parts: [{ text: 'ok' }] } }] } });
+    const token = await registerUser();
+    assert.equal((await post(token)).status, 200);
+    const second = await post(token);
+    assert.equal(second.status, 429);
+    assert.ok(second.headers['retry-after']);
+  });
+});

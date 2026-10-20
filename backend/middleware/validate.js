@@ -70,4 +70,15 @@ const validateLogin = validate(
   ['email', 'password'],
 );
 
-module.exports = { validateCreateCar, validateUpdateCar, validateRegister, validateLogin };
+const validateDescriptionRequest = validate(
+  {
+    make: carRules.make,
+    model: carRules.model,
+    year: carRules.year,
+    fuelType: carRules.fuelType,
+    transmission: carRules.transmission,
+  },
+  ['make', 'model'],
+);
+
+module.exports = { validateCreateCar, validateUpdateCar, validateRegister, validateLogin, validateDescriptionRequest };
