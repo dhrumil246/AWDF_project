@@ -6,15 +6,34 @@ Full stack car inventory app built week by week for **ITUE301 – Advanced Web D
 
 ```
 car-details-management-system/
-├── frontend/          React (Vite)
-├── backend/           Node.js + Express REST API
+├── docker-compose.yml frontend + backend + mongodb
+├── frontend/          React (Vite), Dockerfile, nginx.conf
+├── backend/           Node.js + Express REST API, Dockerfile
 └── docs/
     ├── lab-journal/   weekly notes, key-question answers, screenshots
     ├── evidence/      recorded API responses and server logs
     └── postman/       Postman collection for the API
 ```
 
-## Run the full stack locally
+## Run everything with Docker (recommended)
+
+Needs Docker Desktop. One command builds both images and starts MongoDB, the API and the frontend:
+
+```bash
+cp .env.example .env          # set JWT_SECRET
+docker compose up --build -d
+docker compose exec backend npm run seed   # optional: demo user + 6 sample cars
+```
+
+| Service | Image | URL |
+|---|---|---|
+| `frontend` | nginx serving the Vite build (multi-stage, 102 MB) | http://localhost:5173 |
+| `backend` | Node 22 Alpine, production deps only (266 MB) | http://localhost:5001 |
+| `mongodb` | `mongo:7`, data in the `mongo-data` volume | internal only |
+
+`docker compose down` stops everything but keeps the data; `docker compose down -v` also deletes the database volume.
+
+## Run the full stack locally (without Docker)
 
 Two terminals — the backend must be running for the frontend to load cars.
 
@@ -185,3 +204,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 8 | Lazy loading, code splitting, re-render fix | ✅ |
 | 9 | In-memory caching with node-cache | ✅ |
 | 10 | Event-driven background processing (EventEmitter) | ✅ |
+| 11 | Docker + Docker Compose | ✅ |
