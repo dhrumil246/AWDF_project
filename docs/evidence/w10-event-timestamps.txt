@@ -1,0 +1,16 @@
+# Week 10 — car-created / car-deleted events (NOTIFY_DELAY_MS=2000)
+
+$ curl -X POST /cars ... -w 'total %{time_total}s'   (client side)
+client: request sent    at 2026-10-20T09:14:44.033+00:00
+client: response got   at 2026-10-20T09:14:44.073+00:00 — HTTP 201 total 0.009775s
+
+$ curl -X DELETE /cars/6ad7310412acb6779b8ef7c5
+HTTP 200 total 0.012046s
+
+# Server console (in order)
+POST /cars - 2026-10-20T09:14:44.044Z
+[API] 201 response sent at 2026-10-20T09:14:44.053Z
+[Notification] car-created received at 2026-10-20T09:14:44.053Z
+[Notification] "Kia Seltos" (2024) listed by Demo Dealer <demo@cars.test> — done at 2026-10-20T09:14:46.055Z
+DELETE /cars/6ad7310412acb6779b8ef7c5 - 2026-10-20T09:14:46.632Z
+[Notification] "Kia Seltos" was removed by Demo Dealer at 2026-10-20T09:14:48.644Z

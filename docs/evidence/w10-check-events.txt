@@ -1,0 +1,7 @@
+[Notification] car-created received at 2026-10-20T09:15:00.177Z
+✓ emit() returned after 1 ms while the listener is still waiting 300 ms
+[Notification] car-created received at 2026-10-20T09:15:00.178Z
+[Notification] "Kia Seltos" (2024) listed by Demo Dealer <demo@cars.test> — done at 2026-10-20T09:15:00.480Z
+[Notification] listener failed at 2026-10-20T09:15:00.480Z: Cannot read properties of null (reading 'make')
+✓ listener error was caught by the 'error' listener: Cannot read properties of null (reading 'make')
+✓ process is still running — the failure did not crash it

@@ -1,6 +1,7 @@
 require('dotenv').config({ quiet: true });
 const app = require('./app');
 const connectDB = require('./config/db');
+require('./events/listeners'); // register background event handlers once
 
 const PORT = process.env.PORT || 5000;
 

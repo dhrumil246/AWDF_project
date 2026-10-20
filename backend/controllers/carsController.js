@@ -1,5 +1,6 @@
 const Car = require('../models/Car');
 const { cache, keys, isEnabled } = require('../cache');
+const carEvents = require('../events/carEvents');
 
 const FIELDS = ['make', 'model', 'year', 'fuelType', 'transmission', 'price', 'status', 'registrationNumber', 'description'];
 
@@ -56,7 +57,11 @@ async function createCar(req, res) {
   const car = await Car.create({ ...pickFields(req.body), owner: req.user.id });
   await car.populate('owner', OWNER_FIELDS);
   invalidate();
+
+  // Respond first, then hand the side effect to the event listeners.
   res.status(201).location(`/cars/${car.id}`).json(car);
+  console.log(`[API] 201 response sent at ${new Date().toISOString()}`);
+  carEvents.emit('car-created', { car: car.toJSON(), user: req.user });
 }
 
 async function updateCar(req, res) {
@@ -77,7 +82,9 @@ async function deleteCar(req, res) {
 
   await car.deleteOne();
   invalidate(car.id);
+
   res.status(200).json({ message: 'Car deleted', car });
+  carEvents.emit('car-deleted', { car: car.toJSON(), user: req.user });
 }
 
 module.exports = { getAllCars, getCarById, createCar, updateCar, deleteCar };
