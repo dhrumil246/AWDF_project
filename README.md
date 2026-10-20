@@ -16,11 +16,23 @@ car-details-management-system/
     └── postman/       Postman collection for the API
 ```
 
+## AI descriptions (Week 13)
+
+On the Add / Edit car form, **✨ Generate with AI** asks the backend for a short listing description, which appears in the editable description field with an "AI-generated — review before saving" note.
+
+- `POST /api/ai/generate-description` (JWT required) → `backend/services/ai.js` calls the **Gemini API** with Node's built-in `fetch`. Model: `GEMINI_MODEL` (default `gemini-flash-latest`).
+- The key lives only in `GEMINI_API_KEY` on the server (`backend/.env`, or the root `.env` for Docker) and is sent in the `x-goog-api-key` header. The frontend never sees it.
+- Only make, model, year, fuel type and transmission are sent — no user name/email, no registration number.
+- **Graceful degradation:** no key, invalid key, timeout (`AI_TIMEOUT_MS`, 10 s) or any Gemini error returns `200 { fallback: true }`; the form shows "AI suggestion is unavailable" and saving still works.
+- Rate limit: one request per user every `AI_RATE_LIMIT_MS` (10 s), otherwise `429` with `Retry-After`.
+
+Get a key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY=...` to `backend/.env` (or the root `.env` when using Docker), then restart the backend.
+
 ## Tests and CI (Week 12)
 
 ```bash
 cd backend
-npm test        # 15 API tests: Node's built-in test runner + supertest + in-memory MongoDB
+npm test        # 22 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
 npm run lint    # oxlint
 ```
 
@@ -109,6 +121,7 @@ The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is t
 | POST | `/cars` | 201 created car + `Location` header | 400 validation (per-field `details`) or bad JSON, 409 duplicate registration, 415 not JSON |
 | PUT | `/cars/:id` | 200 updated car (validators run on update) | 400, 403 not owner, 404, 409, 415 |
 | DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 403 not owner, 404 |
+| POST | `/api/ai/generate-description` | 200 `{ description, fallback: false }`, or `{ description: '', fallback: true }` if the AI is unavailable | 400, 401, 429 |
 
 Every `/cars` route also returns **401** without a valid token (missing, invalid, tampered or expired).
 | * | unknown route | – | 404 JSON |
@@ -221,3 +234,4 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | 10 | Event-driven background processing (EventEmitter) | ✅ |
 | 11 | Docker + Docker Compose | ✅ |
 | 12 | Automated tests + GitHub Actions CI | ✅ |
+| 13 | AI integration (Gemini) with graceful degradation | ✅ |
