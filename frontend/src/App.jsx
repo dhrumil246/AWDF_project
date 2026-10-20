@@ -8,7 +8,7 @@ import Spinner from './components/Spinner';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import { useAuth } from './context/AuthContext';
-import { getCars, createCar, updateCar, deleteCar } from './api/cars';
+import { getCars, createCar, updateCar, patchCar, deleteCar } from './api/cars';
 import './App.css';
 
 // Route-based code splitting: each page below becomes its own chunk that is
@@ -86,7 +86,7 @@ function App() {
   const handleToggleStatus = useCallback(async (car) => {
     try {
       const status = car.status === 'available' ? 'sold' : 'available';
-      const updated = await updateCar(car.id, { status });
+      const updated = await patchCar(car.id, { status });
       setCars((prev) => prev.map((c) => (c.id === car.id ? updated : c)));
       setNotice({ type: 'success', message: `${updated.make} ${updated.model} marked ${status}.` });
     } catch (err) {

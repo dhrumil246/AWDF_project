@@ -4,6 +4,7 @@ const requireJson = require('../middleware/requireJson');
 const rateLimit = require('../middleware/rateLimit');
 const { validateDescriptionRequest } = require('../middleware/validate');
 const { generateCarDescription } = require('../services/ai');
+const methodNotAllowed = require('../middleware/methodNotAllowed');
 
 const router = express.Router();
 
@@ -27,5 +28,7 @@ router.post('/generate-description', auth, requireJson, validateDescriptionReque
     });
   }
 });
+
+router.all('/generate-description', methodNotAllowed(['POST']));
 
 module.exports = router;

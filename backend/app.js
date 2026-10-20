@@ -7,6 +7,7 @@ const authRouter = require('./routes/auth');
 const carsRouter = require('./routes/cars');
 const aiRouter = require('./routes/ai');
 const { cache } = require('./cache');
+const { rootLinks } = require('./links');
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(logger);
 
-app.get('/', (req, res) => res.json({ message: 'Car Details API is running' }));
+app.get('/', (req, res) => res.json({ message: 'Car Details API is running', _links: rootLinks }));
 app.use('/auth', authRouter);
 app.use('/cars', carsRouter);
 app.use('/api/ai', aiRouter);

@@ -1,6 +1,7 @@
 const Car = require('../models/Car');
 const { cache, keys, isEnabled } = require('../cache');
 const carEvents = require('../events/carEvents');
+const { withLinks } = require('../links');
 
 const FIELDS = ['make', 'model', 'year', 'fuelType', 'transmission', 'price', 'status', 'registrationNumber', 'description'];
 
@@ -39,15 +40,15 @@ async function getCarById(req, res) {
   const key = keys.car(req.params.id);
   if (isEnabled()) {
     const cached = cache.get(key);
-    if (cached) return res.set('X-Cache', 'HIT').status(200).json(cached);
+    if (cached) return res.set('X-Cache', 'HIT').status(200).json(withLinks(cached, req.user));
   }
 
   const doc = await Car.findById(req.params.id).populate('owner', OWNER_FIELDS);
   if (!doc) return notFound(res, req.params.id); // 404s are not cached
   const car = doc.toJSON();
 
-  if (isEnabled()) cache.set(key, car);
-  res.set('X-Cache', isEnabled() ? 'MISS' : 'BYPASS').status(200).json(car);
+  if (isEnabled()) cache.set(key, car); // cached without _links: they depend on who asks
+  res.set('X-Cache', isEnabled() ? 'MISS' : 'BYPASS').status(200).json(withLinks(car, req.user));
 }
 
 // Called after every successful write so a stale list or car is never served.
@@ -59,7 +60,7 @@ async function createCar(req, res) {
   invalidate();
 
   // Respond first, then hand the side effect to the event listeners.
-  res.status(201).location(`/cars/${car.id}`).json(car);
+  res.status(201).location(`/cars/${car.id}`).json(withLinks(car.toJSON(), req.user));
   console.log(`[API] 201 response sent at ${new Date().toISOString()}`);
   carEvents.emit('car-created', { car: car.toJSON(), user: req.user });
 }
@@ -72,7 +73,7 @@ async function updateCar(req, res) {
   car.set(pickFields(req.body));
   await car.save(); // runs schema validators
   invalidate(car.id);
-  res.status(200).json(car);
+  res.status(200).json(withLinks(car.toJSON(), req.user));
 }
 
 async function deleteCar(req, res) {

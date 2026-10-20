@@ -144,17 +144,17 @@ describe('cars', () => {
     const otherToken = await registerUser('Other', 'other@cars.test');
     const { body: car } = await request(app).post('/cars').set('Authorization', `Bearer ${ownerToken}`).send(kia);
 
-    const put = await request(app).put(`/cars/${car.id}`).set('Authorization', `Bearer ${otherToken}`).send({ price: 1 });
-    assert.equal(put.status, 403);
+    const patch = await request(app).patch(`/cars/${car.id}`).set('Authorization', `Bearer ${otherToken}`).send({ price: 1 });
+    assert.equal(patch.status, 403);
     const del = await request(app).delete(`/cars/${car.id}`).set('Authorization', `Bearer ${otherToken}`);
     assert.equal(del.status, 403);
 
-    const ownPut = await request(app)
-      .put(`/cars/${car.id}`)
+    const ownPatch = await request(app)
+      .patch(`/cars/${car.id}`)
       .set('Authorization', `Bearer ${ownerToken}`)
       .send({ price: 1299000 });
-    assert.equal(ownPut.status, 200);
-    assert.equal(ownPut.body.price, 1299000);
+    assert.equal(ownPatch.status, 200);
+    assert.equal(ownPatch.body.price, 1299000);
   });
 
   it('DELETE /cars/:id removes the car', async () => {
@@ -170,6 +170,68 @@ describe('cars', () => {
     const token = await registerUser();
     const res = await request(app).get('/cars/123').set('Authorization', `Bearer ${token}`);
     assert.equal(res.status, 400);
+  });
+});
+
+describe('REST maturity (Assignment 1)', () => {
+  it('returns 405 with an Allow header for an unsupported method on an existing URL', async () => {
+    const token = await registerUser();
+    const auth = { Authorization: `Bearer ${token}` };
+    const { body: car } = await request(app).post('/cars').set(auth).send(kia);
+
+    const onCollection = await request(app).delete('/cars').set(auth);
+    assert.equal(onCollection.status, 405);
+    assert.equal(onCollection.headers.allow, 'GET, POST');
+
+    const onCar = await request(app).post(`/cars/${car.id}`).set(auth).send({});
+    assert.equal(onCar.status, 405);
+    assert.equal(onCar.headers.allow, 'GET, PUT, PATCH, DELETE');
+
+    const onLogin = await request(app).get('/auth/login');
+    assert.equal(onLogin.status, 405);
+    assert.equal(onLogin.headers.allow, 'POST');
+  });
+
+  it('PATCH updates only the fields sent; PUT requires the full car', async () => {
+    const token = await registerUser();
+    const auth = { Authorization: `Bearer ${token}` };
+    const { body: car } = await request(app).post('/cars').set(auth).send(kia);
+
+    const patch = await request(app).patch(`/cars/${car.id}`).set(auth).send({ status: 'sold' });
+    assert.equal(patch.status, 200);
+    assert.equal(patch.body.status, 'sold');
+    assert.equal(patch.body.model, 'Seltos');
+
+    const partialPut = await request(app).put(`/cars/${car.id}`).set(auth).send({ price: 1 });
+    assert.equal(partialPut.status, 400);
+
+    const fullPut = await request(app).put(`/cars/${car.id}`).set(auth).send({ ...kia, price: 1299000 });
+    assert.equal(fullPut.status, 200);
+    assert.equal(fullPut.body.price, 1299000);
+  });
+
+  it('includes hypermedia links that depend on ownership and state', async () => {
+    const ownerToken = await registerUser('Owner', 'owner@cars.test');
+    const otherToken = await registerUser('Other', 'other@cars.test');
+    const { body: created } = await request(app).post('/cars').set('Authorization', `Bearer ${ownerToken}`).send(kia);
+    assert.equal(created._links.self.href, `/cars/${created.id}`);
+
+    const asOwner = await request(app).get(`/cars/${created.id}`).set('Authorization', `Bearer ${ownerToken}`);
+    assert.deepEqual(Object.keys(asOwner.body._links).sort(), ['collection', 'delete', 'markSold', 'replace', 'self', 'update']);
+    assert.deepEqual(asOwner.body._links.markSold.body, { status: 'sold' });
+
+    const asOther = await request(app).get(`/cars/${created.id}`).set('Authorization', `Bearer ${otherToken}`);
+    assert.deepEqual(Object.keys(asOther.body._links).sort(), ['collection', 'self']);
+
+    const sold = await request(app).patch(`/cars/${created.id}`).set('Authorization', `Bearer ${ownerToken}`).send({ status: 'sold' });
+    assert.ok(sold.body._links.markAvailable);
+    assert.equal(sold.body._links.markSold, undefined);
+  });
+
+  it('GET / lists the API entry points', async () => {
+    const res = await request(app).get('/');
+    assert.equal(res.body._links.login.href, '/auth/login');
+    assert.equal(res.body._links.cars.href, '/cars');
   });
 });
 
