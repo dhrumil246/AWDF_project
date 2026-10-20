@@ -1,0 +1,52 @@
+# Cache correctness (506 cars seeded; Authorization header omitted below for readability)
+
+$ GET /cars   (1st)
+X-Cache: MISS
+506 cars
+
+$ GET /cars   (2nd)
+X-Cache: HIT
+506 cars
+
+$ GET /debug/cache
+{"stats":{"hits":1,"misses":1,"keys":1,"ksize":8,"vsize":20240},"keys":["cars:all"]}
+
+$ POST /cars  (Kia Seltos)
+created 6ad7308e940e13d0bf7b405b
+keys after POST: []
+
+$ GET /cars   (after POST)
+X-Cache: MISS
+507 cars
+first: Seltos
+
+$ GET /cars/6ad7308e940e13d0bf7b405b (1st)
+X-Cache: MISS
+
+$ GET /cars/6ad7308e940e13d0bf7b405b (2nd)
+X-Cache: HIT
+
+$ PUT /cars/6ad7308e940e13d0bf7b405b {price:1299000}
+[200]
+keys after PUT: []
+
+$ GET /cars/6ad7308e940e13d0bf7b405b (after PUT)
+X-Cache: MISS
+price: 1299000
+
+$ GET /cars   (after PUT)
+X-Cache: MISS
+price in list: 1299000
+
+$ DELETE /cars/6ad7308e940e13d0bf7b405b
+[200]
+
+$ GET /cars   (after DELETE)
+X-Cache: MISS
+506 cars
+
+$ GET /cars/6ad7308e940e13d0bf7b405b (after DELETE)
+{"error":"Car with id 6ad7308e940e13d0bf7b405b not found"} [404]
+
+$ GET /debug/cache
+{"stats":{"hits":2,"misses":7,"keys":1,"ksize":8,"vsize":20240},"keys":["cars:all"]}

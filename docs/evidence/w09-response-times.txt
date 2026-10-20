@@ -1,0 +1,30 @@
+# GET /cars response times, 506 cars, local MongoDB, curl time_total in seconds (10 readings after 1 warm-up request)
+
+## Uncached (DISABLE_CACHE=true)
+0.021330 X-Cache: BYPASS
+0.017821 X-Cache: BYPASS
+0.013710 X-Cache: BYPASS
+0.013268 X-Cache: BYPASS
+0.014282 X-Cache: BYPASS
+0.009952 X-Cache: BYPASS
+0.010153 X-Cache: BYPASS
+0.010825 X-Cache: BYPASS
+0.009941 X-Cache: BYPASS
+0.009442 X-Cache: BYPASS
+
+## Cached (node-cache, TTL 60 s)
+0.002651 X-Cache: HIT
+0.002285 X-Cache: HIT
+0.002496 X-Cache: HIT
+0.002549 X-Cache: HIT
+0.002429 X-Cache: HIT
+0.002183 X-Cache: HIT
+0.002795 X-Cache: HIT
+0.002598 X-Cache: HIT
+0.002350 X-Cache: HIT
+0.002193 X-Cache: HIT
+
+## Summary (ms)
+Uncached (DISABLE_CACHE=true): first 3 = 21.3, 17.8, 13.7 | mean of 10 = 13.1 | median = 12.0
+Cached (node-cache, TTL 60 s): first 3 = 2.7, 2.3, 2.5 | mean of 10 = 2.5 | median = 2.5
+Cached responses are 5.3x faster on average (13.1 ms -> 2.5 ms).

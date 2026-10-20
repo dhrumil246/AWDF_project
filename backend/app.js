@@ -5,6 +5,7 @@ const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 const authRouter = require('./routes/auth');
 const carsRouter = require('./routes/cars');
+const { cache } = require('./cache');
 
 const app = express();
 
@@ -25,6 +26,9 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('/debug/error', () => {
     throw new Error('Deliberate test error');
   });
+
+  // Cache hit/miss counters and current keys.
+  app.get('/debug/cache', (req, res) => res.json({ stats: cache.getStats(), keys: cache.keys() }));
 }
 
 app.use(notFound);
