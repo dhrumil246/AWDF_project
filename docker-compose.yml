@@ -1,0 +1,55 @@
+# Whole stack with one command:  docker compose up --build
+# Needs JWT_SECRET in a .env file next to this file (see .env.example).
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db # named volume: data survives container restarts
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      # "mongodb" is the service name above; Docker's DNS resolves it on app-network.
+      MONGO_URI: mongodb://mongodb:27017/cardb
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env next to docker-compose.yml}
+      CLIENT_URL: http://localhost:5173
+    ports:
+      - "5001:5000" # host 5001 (macOS AirPlay uses 5000) → container 5000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # The browser runs on the host, so it must call the backend through the
+        # host port, not the Docker service name.
+        VITE_API_URL: http://localhost:5001
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
