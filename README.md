@@ -10,6 +10,7 @@ car-details-management-system/
 ├── docker-compose.yml frontend + backend + mongodb
 ├── frontend/          React (Vite), Dockerfile, nginx.conf
 ├── backend/           Node.js + Express REST API, Dockerfile
+├── assignments/       assignment write-ups (MATURITY.md, …) and their evidence
 └── docs/
     ├── lab-journal/   weekly notes, key-question answers, screenshots
     ├── evidence/      recorded API responses and server logs
@@ -32,7 +33,7 @@ Get a key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY=...` to 
 
 ```bash
 cd backend
-npm test        # 22 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
+npm test        # 26 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
 npm run lint    # oxlint
 ```
 
@@ -119,11 +120,14 @@ The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is t
 | GET | `/cars` | 200 list of cars (newest first) | – |
 | GET | `/cars/:id` | 200 car | 400 invalid ObjectId, 404 not found |
 | POST | `/cars` | 201 created car + `Location` header | 400 validation (per-field `details`) or bad JSON, 409 duplicate registration, 415 not JSON |
-| PUT | `/cars/:id` | 200 updated car (validators run on update) | 400, 403 not owner, 404, 409, 415 |
+| PUT | `/cars/:id` | 200 replaced car — full representation (make, model, year, price required) | 400, 403 not owner, 404, 409, 415 |
+| PATCH | `/cars/:id` | 200 updated car — only the fields sent change | 400, 403 not owner, 404, 409, 415 |
 | DELETE | `/cars/:id` | 200 `{ message, car }` | 400, 403 not owner, 404 |
 | POST | `/api/ai/generate-description` | 200 `{ description, fallback: false }`, or `{ description: '', fallback: true }` if the AI is unavailable | 400, 401, 429 |
 
-Every `/cars` route also returns **401** without a valid token (missing, invalid, tampered or expired).
+Every `/cars` route also returns **401** without a valid token (missing, invalid, tampered or expired). An unsupported method on an existing URL returns **405** with an `Allow` header (e.g. `DELETE /cars` → `Allow: GET, POST`).
+
+Single-car responses include **`_links`** (HATEOAS): `self` and `collection` for everyone, plus `update`, `replace`, `delete` and `markSold`/`markAvailable` for the owner. `GET /` lists the API's entry points. See [`assignments/MATURITY.md`](assignments/MATURITY.md).
 | * | unknown route | – | 404 JSON |
 
 Middleware pipeline: `cors` (origins from `CLIENT_URL`) → `express.json()` → `logger` (method, URL, timestamp) → routers → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
@@ -217,6 +221,12 @@ main.jsx (BrowserRouter → AuthProvider)
 ```
 
 Car data lives in `frontend/src/data/cars.js`; components never hardcode content.
+
+## Assignments
+
+| # | Week | Topic | File | Status |
+|---|---|---|---|---|
+| A1 | 4 | Richardson Maturity Model | [`assignments/MATURITY.md`](assignments/MATURITY.md) | ✅ |
 
 ## Progress
 

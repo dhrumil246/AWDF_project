@@ -1,0 +1,193 @@
+# A1 — API behaviour AFTER the maturity improvements (Docker stack)
+# Authorization: Bearer <token> sent on every /cars request
+
+$ GET /
+HTTP/1.1 200 OK
+{
+  "message": "Car Details API is running",
+  "_links": {
+    "self": {
+      "href": "/",
+      "method": "GET"
+    },
+    "register": {
+      "href": "/auth/register",
+      "method": "POST"
+    },
+    "login": {
+      "href": "/auth/login",
+      "method": "POST"
+    },
+    "me": {
+      "href": "/auth/me",
+      "method": "GET"
+    },
+    "cars": {
+      "href": "/cars",
+      "method": "GET"
+    },
+    "createCar": {
+      "href": "/cars",
+      "method": "POST"
+    },
+    "generateDescription": {
+      "href": "/api/ai/generate-description",
+      "method": "POST"
+    }
+  }
+}
+
+$ GET /cars/6ad778647e17e21a163515d8
+HTTP/1.1 200 OK
+{
+  "make": "Kia",
+  "model": "Seltos",
+  "year": 2026,
+  "price": 1350000,
+  "fuelType": "Petrol",
+  "transmission": "Manual",
+  "status": "available",
+  "description": "This 2026 Kia Seltos pairs a petrol engi...",
+  "owner": {
+    "name": "Demo Dealer",
+    "id": "6ad73487475bce46bcd5f3e2"
+  },
+  "createdAt": "2026-10-20T14:19:16.936Z",
+  "updatedAt": "2026-10-20T14:19:16.936Z",
+  "id": "6ad778647e17e21a163515d8",
+  "_links": {
+    "self": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "GET"
+    },
+    "collection": {
+      "href": "/cars",
+      "method": "GET"
+    },
+    "update": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PATCH"
+    },
+    "replace": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PUT"
+    },
+    "delete": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "DELETE"
+    },
+    "markSold": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PATCH",
+      "body": {
+        "status": "sold"
+      }
+    }
+  }
+}
+
+$ PATCH /cars/6ad778647e17e21a163515d8  body: {"price":1300000}
+HTTP/1.1 200 OK
+{
+  "make": "Kia",
+  "model": "Seltos",
+  "year": 2026,
+  "price": 1300000,
+  "fuelType": "Petrol",
+  "transmission": "Manual",
+  "status": "available",
+  "description": "This 2026 Kia Seltos pairs a petrol engi...",
+  "owner": {
+    "name": "Demo Dealer",
+    "id": "6ad73487475bce46bcd5f3e2"
+  },
+  "createdAt": "2026-10-20T14:19:16.936Z",
+  "updatedAt": "2026-10-20T14:26:15.144Z",
+  "id": "6ad778647e17e21a163515d8",
+  "_links": {
+    "self": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "GET"
+    },
+    "collection": {
+      "href": "/cars",
+      "method": "GET"
+    },
+    "update": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PATCH"
+    },
+    "replace": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PUT"
+    },
+    "delete": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "DELETE"
+    },
+    "markSold": {
+      "href": "/cars/6ad778647e17e21a163515d8",
+      "method": "PATCH",
+      "body": {
+        "status": "sold"
+      }
+    }
+  }
+}
+
+$ PUT /cars/6ad778647e17e21a163515d8  body: {"price":1}
+HTTP/1.1 400 Bad Request
+{
+  "error": "Validation failed",
+  "details": {
+    "make": "make is required",
+    "model": "model is required",
+    "year": "year is required"
+  }
+}
+
+$ DELETE /cars
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, POST
+{
+  "error": "Method DELETE not allowed on /cars",
+  "allowed": [
+    "GET",
+    "POST"
+  ]
+}
+
+$ PUT /cars
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, POST
+{
+  "error": "Method PUT not allowed on /cars",
+  "allowed": [
+    "GET",
+    "POST"
+  ]
+}
+
+$ POST /cars/6ad778647e17e21a163515d8  body: {"price":1}
+HTTP/1.1 405 Method Not Allowed
+Allow: GET, PUT, PATCH, DELETE
+{
+  "error": "Method POST not allowed on /cars/6ad778647e17e21a163515d8",
+  "allowed": [
+    "GET",
+    "PUT",
+    "PATCH",
+    "DELETE"
+  ]
+}
+
+$ GET /auth/login
+HTTP/1.1 405 Method Not Allowed
+Allow: POST
+{
+  "error": "Method GET not allowed on /auth/login",
+  "allowed": [
+    "POST"
+  ]
+}
+

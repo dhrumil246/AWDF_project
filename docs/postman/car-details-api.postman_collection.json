@@ -298,7 +298,7 @@
           }
         },
         {
-          "name": "Update car",
+          "name": "Replace car (PUT, full)",
           "request": {
             "method": "PUT",
             "header": [
@@ -317,10 +317,42 @@
                 "{{carId}}"
               ]
             },
-            "description": "200 (owner only, else 403)",
+            "description": "200; all of make, model, year, price required (owner only, else 403)",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"price\": 1299000,\n  \"status\": \"sold\"\n}",
+              "raw": "{\n  \"make\": \"Kia\",\n  \"model\": \"Seltos\",\n  \"year\": 2024,\n  \"price\": 1299000,\n  \"status\": \"sold\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Update car (PATCH, partial)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars/{{carId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "{{carId}}"
+              ]
+            },
+            "description": "200; only the fields sent change. Response has _links.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1250000\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -666,6 +698,125 @@
               ]
             },
             "description": "500 (global error handler)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "REST maturity (A1)",
+      "item": [
+        {
+          "name": "API entry point",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "200 with _links to every top-level capability"
+          }
+        },
+        {
+          "name": "Wrong method on collection",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cars",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars"
+              ]
+            },
+            "description": "405, Allow: GET, POST"
+          }
+        },
+        {
+          "name": "Wrong method on a car",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars/{{carId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "{{carId}}"
+              ]
+            },
+            "description": "405, Allow: GET, PUT, PATCH, DELETE",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Partial PUT rejected",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cars/{{carId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cars",
+                "{{carId}}"
+              ]
+            },
+            "description": "400: PUT needs the full car; use PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Wrong method on login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "405, Allow: POST"
           }
         }
       ]

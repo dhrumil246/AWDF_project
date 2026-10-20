@@ -1,0 +1,27 @@
+# A1 — API behaviour BEFORE the maturity improvements (Week 7–13 code, Docker stack)
+# Authorization: Bearer <token> sent on every /cars request
+
+$ GET /
+HTTP/1.1 200 OK
+{"message":"Car Details API is running"}
+
+$ GET /cars/6ad778647e17e21a163515d8
+HTTP/1.1 200 OK
+{"make":"Kia","model":"Seltos","year":2026,"price":1350000,"fuelType":"Petrol","transmission":"Manual","status":"available","description":"This 2026 Kia Seltos pairs a petrol engine with a manual gearbox — a practical compact SUV for city drives and weekend trips. Single owner, test drive availabl
+
+$ PATCH /cars/6ad778647e17e21a163515d8  body: {"price":1300000}
+HTTP/1.1 404 Not Found
+{"error":"Route PATCH /cars/6ad778647e17e21a163515d8 not found"}
+
+$ DELETE /cars
+HTTP/1.1 404 Not Found
+{"error":"Route DELETE /cars not found"}
+
+$ PUT /cars
+HTTP/1.1 404 Not Found
+{"error":"Route PUT /cars not found"}
+
+$ POST /cars/6ad778647e17e21a163515d8  body: {"price":1}
+HTTP/1.1 404 Not Found
+{"error":"Route POST /cars/6ad778647e17e21a163515d8 not found"}
+
