@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
+import Spinner from '../components/Spinner';
+import ErrorMessage from '../components/ErrorMessage';
 
-function Home({ cars }) {
+function Home({ cars, loading, error, onRetry }) {
+  if (loading) return <Spinner label="Loading inventory..." />;
+  if (error) return <ErrorMessage message={error} onRetry={onRetry} />;
+
   const available = cars.filter((c) => c.status === 'available').length;
 
   return (

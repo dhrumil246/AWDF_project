@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const logger = require('./middleware/logger');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
@@ -6,7 +7,11 @@ const carsRouter = require('./routes/cars');
 
 const app = express();
 
-// Middleware pipeline: body parsing → logging → routes → 404 → error handler (last)
+// Allow the React dev server (or the origins listed in CLIENT_URL) to call the API.
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map((o) => o.trim());
+
+// Middleware pipeline: CORS → body parsing → logging → routes → 404 → error handler (last)
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(logger);
 

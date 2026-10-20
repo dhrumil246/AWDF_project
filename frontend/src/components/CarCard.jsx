@@ -1,9 +1,24 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const formatPrice = (price) => `₹${price.toLocaleString('en-IN')}`;
 
-function CarCard({ car }) {
+// onToggleStatus / onDelete are optional: the live preview renders without them.
+function CarCard({ car, onToggleStatus, onDelete }) {
   const [showDetails, setShowDetails] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const run = async (action) => {
+    setBusy(true);
+    await action();
+    setBusy(false);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete ${car.make} ${car.model}? This cannot be undone.`)) {
+      run(() => onDelete(car.id));
+    }
+  };
 
   return (
     <article className="card">
@@ -18,11 +33,29 @@ function CarCard({ car }) {
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
       {showDetails && (
-        <ul className="specs">
-          <li>{car.year}</li>
-          <li>{car.fuelType}</li>
-          <li>{car.transmission}</li>
-        </ul>
+        <>
+          <ul className="specs">
+            <li>{car.year}</li>
+            <li>{car.fuelType}</li>
+            <li>{car.transmission}</li>
+            {car.registrationNumber && <li>{car.registrationNumber}</li>}
+          </ul>
+          {car.description && <p className="description">{car.description}</p>}
+        </>
+      )}
+
+      {onDelete && (
+        <div className="card-actions">
+          <Link to={`/cars/${car.id}/edit`} className="action">
+            Edit
+          </Link>
+          <button type="button" className="action" disabled={busy} onClick={() => run(() => onToggleStatus(car))}>
+            Mark {car.status === 'available' ? 'sold' : 'available'}
+          </button>
+          <button type="button" className="action action-danger" disabled={busy} onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
       )}
     </article>
   );
