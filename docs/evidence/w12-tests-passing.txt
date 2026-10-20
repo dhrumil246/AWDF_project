@@ -1,0 +1,26 @@
+# Week 12 — test fixed, run locally with npm test
+
+    ok 1 - GET / returns 200
+    ok 2 - unknown routes return a JSON 404
+ok 1 - general
+    ok 1 - register returns a token and never the password
+    ok 2 - rejects a duplicate email with 409
+    ok 3 - rejects a wrong password with 401
+    ok 4 - GET /auth/me returns the logged-in user
+ok 2 - auth
+    ok 1 - GET /cars without a token returns 401
+    ok 2 - GET /cars with an invalid token returns 401
+    ok 3 - GET /cars with a token returns 200 and an empty list
+    ok 4 - POST /cars with missing fields returns 400 with details
+    ok 5 - POST /cars creates a car that GET /cars then returns
+    ok 6 - caches GET /cars and invalidates the cache on write
+    ok 7 - only the owner can update or delete a car (403 for others)
+    ok 8 - DELETE /cars/:id removes the car
+    ok 9 - GET /cars/:id with a malformed id returns 400
+ok 3 - cars
+# tests 15
+# suites 3
+# pass 15
+# fail 0
+# duration_ms 1770.233375
+exit code: 0

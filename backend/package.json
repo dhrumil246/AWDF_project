@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "seed": "node scripts/seed.js",
-    "check:events": "node scripts/check-events.js"
+    "check:events": "node scripts/check-events.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "lint": "oxlint ."
   },
   "author": "",
   "license": "ISC",
@@ -20,5 +22,10 @@
     "mongoose": "^9.11.2",
     "node-cache": "^5.1.2"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "oxlint": "^1.89.0",
+    "supertest": "^7.3.1"
+  }
 }
