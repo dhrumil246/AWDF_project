@@ -8,6 +8,7 @@ Full stack car inventory app built week by week for **ITUE301 – Advanced Web D
 car-details-management-system/
 ├── .github/workflows/ci.yml  lint → test → build → Docker images
 ├── docker-compose.yml frontend + backend + mongodb
+├── deploy/blue-green/ blue-green deployment (two backends + nginx switch)
 ├── frontend/          React (Vite), Dockerfile, nginx.conf
 ├── backend/           Node.js + Express REST API, Dockerfile
 ├── assignments/       assignment write-ups (MATURITY.md, …) and their evidence
@@ -33,7 +34,7 @@ Get a key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY=...` to 
 
 ```bash
 cd backend
-npm test        # 30 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
+npm test        # 31 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
 npm run lint    # oxlint
 ```
 
@@ -116,6 +117,7 @@ The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is t
 
 | Method | Path | Success | Errors |
 |---|---|---|---|
+| GET | `/health` | 200 `{ status, version, color, uptimeSeconds }` | 503 if the database is down |
 | POST | `/auth/register` | 201 `{ token, user }` | 400 validation, 409 email exists |
 | POST | `/auth/login` | 200 `{ token, user }` | 400 validation, 401 invalid email or password |
 | GET | `/auth/me` | 200 current user | 401 |
@@ -233,6 +235,7 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | A3 | 9 | Load testing with Apache Bench | [`assignments/LOADTEST.md`](assignments/LOADTEST.md) | ✅ |
 | A4 | 10 | Monolith vs microservices | [`assignments/ARCHITECTURE.md`](assignments/ARCHITECTURE.md) | ✅ |
 | A5 | 11 | Cloud service models, Docker resource limits | [`assignments/CLOUD.md`](assignments/CLOUD.md) | ✅ |
+| A6 | 12 | Blue-green deployment | [`assignments/DEPLOYMENT.md`](assignments/DEPLOYMENT.md) | ✅ |
 
 ## Progress
 
