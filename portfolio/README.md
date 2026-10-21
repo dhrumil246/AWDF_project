@@ -2,6 +2,8 @@
 
 React portfolio built for **ITUE301 – Advanced Web Development Frameworks** (Practicals 1–3).
 
+Practical 3: the Projects page lists my public GitHub repositories live from `https://api.github.com/users/dhrumil246/repos`, with a loading spinner, an error message with *Try again*, and a search filter.
+
 ## Tech
 
 - React (Vite)
