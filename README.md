@@ -229,6 +229,7 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | A1 | 4 | Richardson Maturity Model | [`assignments/MATURITY.md`](assignments/MATURITY.md) | ✅ |
 | A2 | 7 | STRIDE, HTTPS/TLS, secure coding | [`assignments/SECURITY.md`](assignments/SECURITY.md) | ✅ |
 | A3 | 9 | Load testing with Apache Bench | [`assignments/LOADTEST.md`](assignments/LOADTEST.md) | ✅ |
+| A4 | 10 | Monolith vs microservices | [`assignments/ARCHITECTURE.md`](assignments/ARCHITECTURE.md) | ✅ |
 
 ## Progress
 
