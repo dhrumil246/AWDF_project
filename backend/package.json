@@ -9,7 +9,8 @@
     "seed": "node scripts/seed.js",
     "check:events": "node scripts/check-events.js",
     "test": "node --test \"tests/**/*.test.js\"",
-    "lint": "oxlint ."
+    "lint": "oxlint .",
+    "ai:design": "node scripts/ai-design-review.js"
   },
   "author": "",
   "license": "ISC",
