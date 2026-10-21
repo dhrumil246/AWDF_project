@@ -1,0 +1,40 @@
+# A3 — CACHE ON (node-cache, TTL 60 s), 506 cars, local API + local MongoDB
+# Machine: Apple M1, 8 cores, Node v22.23.2; This is ApacheBench, Version 2.3 <$Revision: 1923142 $>
+
+X-Cache: MISS
+=== ab -n 1000 -c 10 GET /cars ===
+Document Length:        152391 bytes
+Complete requests:      1000
+Failed requests:        0
+Requests per second:    738.72 [#/sec] (mean)
+Time per request:       13.537 [ms] (mean)
+Time per request:       1.354 [ms] (mean, across all concurrent requests)
+Transfer rate:          110110.47 [Kbytes/sec] received
+  50%     13
+  90%     14
+  99%     18
+ 100%     22 (longest request)
+=== ab -n 1000 -c 50 GET /cars ===
+Document Length:        152391 bytes
+Complete requests:      1000
+Failed requests:        0
+Requests per second:    766.60 [#/sec] (mean)
+Time per request:       65.223 [ms] (mean)
+Time per request:       1.304 [ms] (mean, across all concurrent requests)
+Transfer rate:          114265.57 [Kbytes/sec] received
+  50%     64
+  90%     67
+  99%     70
+ 100%     71 (longest request)
+=== ab -n 1000 -c 100 GET /cars ===
+Document Length:        152391 bytes
+Complete requests:      1000
+Failed requests:        0
+Requests per second:    772.20 [#/sec] (mean)
+Time per request:       129.500 [ms] (mean)
+Time per request:       1.295 [ms] (mean, across all concurrent requests)
+Transfer rate:          115100.81 [Kbytes/sec] received
+  50%    128
+  90%    131
+  99%    134
+ 100%    134 (longest request)
