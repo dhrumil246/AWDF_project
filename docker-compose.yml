@@ -5,6 +5,13 @@ services:
   mongodb:
     image: mongo:7
     restart: unless-stopped
+    deploy:
+      resources:
+        limits: # hard caps: the container can never use more than this
+          cpus: "1.0"
+          memory: 512M
+        reservations: # guaranteed minimum
+          memory: 256M
     volumes:
       - mongo-data:/data/db # named volume: data survives container restarts
     networks:
@@ -18,6 +25,13 @@ services:
   backend:
     build: ./backend
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50" # half a CPU core
+          memory: 256M # exceeding this gets the process OOM-killed (then restarted)
+        reservations:
+          memory: 128M
     environment:
       PORT: 5000
       # "mongodb" is the service name above; Docker's DNS resolves it on app-network.
@@ -26,6 +40,7 @@ services:
       CLIENT_URL: http://localhost:5173
       # Optional: without it the AI button reports that suggestions are unavailable.
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      DISABLE_CACHE: ${DISABLE_CACHE:-false}
     ports:
       - "5001:5000" # host 5001 (macOS AirPlay uses 5000) → container 5000
     depends_on:
@@ -42,6 +57,13 @@ services:
         # host port, not the Docker service name.
         VITE_API_URL: http://localhost:5001
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25" # nginx serving static files needs very little
+          memory: 64M
+        reservations:
+          memory: 16M
     ports:
       - "5173:80"
     depends_on:

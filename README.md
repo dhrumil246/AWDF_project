@@ -59,6 +59,8 @@ docker compose exec backend npm run seed   # optional: demo user + 6 sample cars
 | `backend` | Node 22 Alpine, production deps only (266 MB) | http://localhost:5001 |
 | `mongodb` | `mongo:7`, data in the `mongo-data` volume | internal only |
 
+Each service has CPU and memory limits (`deploy.resources` — backend 0.5 CPU / 256 MiB, MongoDB 1 CPU / 512 MiB, frontend 0.25 CPU / 64 MiB); see [`assignments/CLOUD.md`](assignments/CLOUD.md).
+
 `docker compose down` stops everything but keeps the data; `docker compose down -v` also deletes the database volume.
 
 ## Run the full stack locally (without Docker)
@@ -230,6 +232,7 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | A2 | 7 | STRIDE, HTTPS/TLS, secure coding | [`assignments/SECURITY.md`](assignments/SECURITY.md) | ✅ |
 | A3 | 9 | Load testing with Apache Bench | [`assignments/LOADTEST.md`](assignments/LOADTEST.md) | ✅ |
 | A4 | 10 | Monolith vs microservices | [`assignments/ARCHITECTURE.md`](assignments/ARCHITECTURE.md) | ✅ |
+| A5 | 11 | Cloud service models, Docker resource limits | [`assignments/CLOUD.md`](assignments/CLOUD.md) | ✅ |
 
 ## Progress
 

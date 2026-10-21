@@ -1,0 +1,46 @@
+# A5 — effect of the backend CPU limit (docker compose stack, 506 cars, cache on)
+
+$ docker inspect (limits from docker-compose.yml)
+mongodb: cpus=1000000000 (1e9 = 1 CPU) memory=536870912 bytes reservation=268435456 bytes
+backend: cpus=500000000 (1e9 = 1 CPU) memory=268435456 bytes reservation=134217728 bytes
+frontend: cpus=250000000 (1e9 = 1 CPU) memory=67108864 bytes reservation=16777216 bytes
+
+$ docker stats (idle)
+NAME                                       CPU %     MEM USAGE / LIMIT   MEM %
+mongodb-1    0.72%     86.54MiB / 512MiB   16.90%
+backend-1    0.31%     30.2MiB / 256MiB    11.80%
+frontend-1   0.00%     7.254MiB / 64MiB    11.33%
+
+## backend limited to 0.50 CPU (as configured)
+X-Cache: MISS
+=== ab -n 1000 -c 20 GET /cars ===
+docker stats during load: backend-1 cpu=50.00% mem=41.23MiB / 256MiB
+Document Length:        152391 bytes
+Complete requests:      1000
+Failed requests:        0
+Requests per second:    178.81 [#/sec] (mean)
+Time per request:       111.853 [ms] (mean)
+Time per request:       5.593 [ms] (mean, across all concurrent requests)
+Transfer rate:          26652.07 [Kbytes/sec] received
+  50%    101
+  90%    165
+  99%    227
+ 100%    273 (longest request)
+
+## backend limit raised to 1.0 CPU (docker update --cpus 1.0)
+X-Cache: HIT
+=== ab -n 1000 -c 20 GET /cars ===
+Document Length:        152391 bytes
+Complete requests:      1000
+Failed requests:        0
+Requests per second:    471.20 [#/sec] (mean)
+Time per request:       42.445 [ms] (mean)
+Time per request:       2.122 [ms] (mean, across all concurrent requests)
+Transfer rate:          70235.40 [Kbytes/sec] received
+  50%     39
+  90%     51
+  99%     83
+ 100%     86 (longest request)
+docker stats during load: backend-1 cpu=21.54% mem=44.09MiB / 256MiB
+
+(limit restored to 0.50 CPU)
