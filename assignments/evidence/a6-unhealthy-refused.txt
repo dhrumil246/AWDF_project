@@ -1,0 +1,10 @@
+# A6 — safety check: switching to an unhealthy colour is refused
+
+$ docker compose stop backend-green
+Container car-bluegreen-backend-green-1  Stopped
+$ deploy/blue-green/bluegreen.sh switch green
+service "backend-green" is not running
+backend-green is not healthy — not switching
+$ curl http://localhost:5002/health → {"status":"ok","version":"1.0.0","color":"blue","uptimeSeconds":170}
+$ docker compose start backend-green
+Container car-bluegreen-backend-green-1  Started

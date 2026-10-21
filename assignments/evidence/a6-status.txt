@@ -1,0 +1,4 @@
+Live colour: blue
+  blue: {"status":"ok","version":"1.0.0","color":"blue","uptimeSeconds":143}
+  green: {"status":"ok","version":"1.1.0","color":"green","uptimeSeconds":143}
+  via proxy: {"status":"ok","version":"1.0.0","color":"blue","uptimeSeconds":144}

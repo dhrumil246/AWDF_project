@@ -1,0 +1,13 @@
+# A6 — zero-downtime switch: GET http://localhost:5002/health every ~50 ms for 25 s while switching
+# Switched live traffic to green at 07:48:40.838
+# Switched live traffic to blue at 07:48:51.135  (rollback)
+
+Total requests:  424
+Non-200 / failed: 0
+Served by blue:  249
+Served by green: 175
+
+Timeline (consecutive responses grouped by status and colour):
+  07:48:31.516 → 07:48:40.645  HTTP 200  blue   ×155
+  07:48:40.701 → 07:48:50.947  HTTP 200  green  ×175
+  07:48:51.002 → 07:48:56.470  HTTP 200  blue   ×94

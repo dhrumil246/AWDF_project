@@ -1,0 +1,13 @@
+# A6 — both colours share one database: write through blue, read through green
+
+$ GET /health → {"status":"ok","version":"1.0.0","color":"blue","uptimeSeconds":128}
+$ POST /cars (via blue)
+created car 6ad86e762ff5a88775355a55
+
+Switched live traffic to green at 07:49:18.451
+$ GET /health → {"status":"ok","version":"1.1.0","color":"green","uptimeSeconds":135}
+$ GET /cars/6ad86e762ff5a88775355a55 (via green, same token)
+{'make': 'Kia', 'model': 'Seltos', 'price': 1350000, 'id': '6ad86e762ff5a88775355a55'}
+
+Switched live traffic to blue at 07:49:25.771
+$ GET /health → {"status":"ok","version":"1.0.0","color":"blue","uptimeSeconds":143}

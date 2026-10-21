@@ -49,6 +49,13 @@ describe('general', () => {
     assert.equal(res.status, 200);
   });
 
+  it('GET /health reports status and version', async () => {
+    const res = await request(app).get('/health');
+    assert.equal(res.status, 200);
+    assert.equal(res.body.status, 'ok');
+    assert.ok(res.body.version);
+  });
+
   it('unknown routes return a JSON 404', async () => {
     const res = await request(app).get('/does-not-exist');
     assert.equal(res.status, 404);

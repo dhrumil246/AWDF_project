@@ -27,6 +27,19 @@ app.use(sanitize);
 app.use(logger);
 
 app.get('/', (req, res) => res.json({ message: 'Car Details API is running', _links: rootLinks }));
+
+// Health check for load balancers / blue-green switching: which version and
+// colour is answering, and whether the database connection is up.
+const { version } = require('./package.json');
+app.get('/health', (req, res) => {
+  const dbUp = mongoose.connection.readyState === 1;
+  res.status(dbUp ? 200 : 503).json({
+    status: dbUp ? 'ok' : 'degraded',
+    version: process.env.APP_VERSION || version,
+    color: process.env.APP_COLOR || null,
+    uptimeSeconds: Math.round(process.uptime()),
+  });
+});
 app.use('/auth', authRouter);
 app.use('/cars', carsRouter);
 app.use('/api/ai', aiRouter);
