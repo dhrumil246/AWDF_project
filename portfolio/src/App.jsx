@@ -11,7 +11,7 @@ import './App.css';
 
 const profile = {
   name: 'Dhrumil Amin',
-  role: 'B.Tech IT Student · Full Stack Developer',
+  role: 'B.Tech IT student and full stack developer',
   email: 'dhrumil.work964@gmail.com',
   bio: 'I am a 5th semester B.Tech student who enjoys building web applications end to end, from React interfaces to Node.js APIs.',
 };
@@ -28,17 +28,17 @@ const projects = [
   {
     title: 'Task Manager',
     description: 'Full stack task management app with authentication.',
-    tech: 'React · Node.js · MongoDB',
+    tech: 'React, Node.js, MongoDB',
   },
   {
     title: 'Weather Dashboard',
     description: 'Shows the current weather for any city using a public API.',
-    tech: 'JavaScript · OpenWeather API',
+    tech: 'JavaScript, OpenWeather API',
   },
   {
     title: 'Library Management System',
     description: 'Tracks books, members and issue/return records.',
-    tech: 'Java · MySQL',
+    tech: 'Java, MySQL',
   },
 ];
 
@@ -52,12 +52,17 @@ function App() {
 
   return (
     <>
-      <Header name={profile.name} role={profile.role} themeColor="#4f46e5" />
       <NavBar links={navLinks}>
-        <button type="button" className="theme-toggle" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? '☀️ Light' : '🌙 Dark'}
+        <button
+          type="button"
+          className="theme-toggle"
+          aria-pressed={darkMode}
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          {darkMode ? 'Light theme' : 'Dark theme'}
         </button>
       </NavBar>
+      <Header name={profile.name} role={profile.role} themeColor="#2340c8" />
       <main className="container">
         <Routes>
           <Route path="/" element={<Home bio={profile.bio} skills={skills} />} />

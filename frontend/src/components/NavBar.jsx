@@ -5,17 +5,19 @@ function NavBar({ links }) {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="navbar">
-      {links.map((link) => (
-        <NavLink key={link.to} to={link.to} end>
-          {link.label}
-        </NavLink>
-      ))}
+    <nav className="navbar" aria-label="Main">
+      <div className="navbar-links">
+        {links.map((link) => (
+          <NavLink key={link.to} to={link.to} end>
+            {link.label}
+          </NavLink>
+        ))}
+      </div>
       <span className="navbar-user">
         {user ? (
           <>
-            <span className="muted">Hi, {user.name}</span>
-            <button type="button" className="action" onClick={logout}>
+            <span className="navbar-name">{user.name}</span>
+            <button type="button" className="action action-quiet" onClick={logout}>
               Log out
             </button>
           </>

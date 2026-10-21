@@ -1,3 +1,7 @@
+/* Car Details Management System — "lot desk" theme.
+   Asphalt, concrete and road-marking yellow; Barlow Condensed for anything
+   you would read off a car or a sign (model names, prices, plates). */
+
 *,
 *::before,
 *::after {
@@ -5,24 +9,68 @@
 }
 
 :root {
-  --bg: #f8fafc;
+  --asphalt: #18202b;
+  --asphalt-2: #263140;
+  --concrete: #edf0f3;
   --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --brand: #b91c1c;
-  --link: #b91c1c;
+  --line: #d5dbe2;
+  --text: #18202b;
+  --muted: #535e6c; /* 5.6:1 on --concrete, 6.4:1 on white */
+  --marking: #f4c21a; /* road-marking yellow: price stickers and the primary action */
+  --marking-deep: #c99a00;
+  --go: #1f7a4d; /* available — 5.4:1 on white */
+  --stop: #b42318; /* destructive */
 
-  /* Assignment 7 — AI-assisted design tokens (see assignments/AIDESIGN.md) */
-  --focus-ring: #b91c1c; /* 6.18:1 against --bg, above the 3:1 needed for focus indicators */
-  --input-border: #8a94a6; /* 3.06:1 against white: input boundaries meet WCAG 1.4.11 (was 1.23:1) */
+  /* compatibility names used across the app */
+  --bg: var(--concrete);
+  --text-strong: var(--asphalt);
+  --border: var(--line);
+  --brand: var(--asphalt);
+  --link: #1d4ed8;
+
+  --display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-sm: 4px;
+  --radius: 8px;
+
+  /* Assignment 7 tokens (see assignments/AIDESIGN.md), re-checked for this theme */
+  --focus-ring: #18202b; /* 14.6:1 on --concrete */
+  --input-border: #8a94a6; /* 3.06:1 on white (WCAG 1.4.11) */
   --danger: #991b1b;
   --danger-bg: #fee2e2;
   --danger-border: #fca5a5;
-  --target-min: 24px; /* WCAG 2.2 AA (2.5.8) minimum target size */
+  --target-min: 24px; /* WCAG 2.2 AA (2.5.8) */
 }
 
-/* AI suggestion #2: one visible, consistent keyboard focus ring for everything interactive */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--concrete);
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a {
+  color: var(--link);
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -32,14 +80,11 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color: var(--text);
-  background: var(--bg);
-}
-
-a {
-  color: var(--link);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

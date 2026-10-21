@@ -84,7 +84,10 @@ Using tokens means the theme can be changed in one place, and each value carries
 
 ---
 
-## 5. Rubric checklist
+## 5. Note: later redesign
+After this assignment the whole UI was redesigned ([`docs/redesign`](../docs/redesign/README.md)). The token **names** introduced here were kept, and every value was re-checked against the new palette: `--input-border` is unchanged (3.06:1), `--focus-ring` became asphalt `#18202B` (14.3:1 on the page) and switches to marking yellow on the dark app bar (9.8:1), `--danger*` and `--target-min` are unchanged. The before/after screenshots above show the state at the time of this assignment.
+
+## 6. Rubric checklist
 | Criterion | Marks | Where |
 |---|---|---|
 | AI integration for design | 4 | §1 Gemini API call from `ai-design-review.js` with screenshots + CSS, prompt engineering, saved unedited output |

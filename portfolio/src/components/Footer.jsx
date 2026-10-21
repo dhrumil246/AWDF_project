@@ -3,10 +3,10 @@ const year = new Date().getFullYear();
 function Footer({ name, email }) {
   return (
     <footer className="footer">
+      <a href={`mailto:${email}`}>{email}</a>
       <p>
-        Contact: <a href={`mailto:${email}`}>{email}</a>
+        © {year} {name}
       </p>
-      <p>© {year} {name}</p>
     </footer>
   );
 }

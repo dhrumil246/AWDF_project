@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom';
+
 function Header({ title, subtitle }) {
   return (
     <header className="header">
-      <h1>{title}</h1>
-      <p>{subtitle}</p>
+      <Link to="/" className="wordmark">
+        <span className="wordmark-title">{title}</span>
+        <span className="wordmark-subtitle">{subtitle}</span>
+      </Link>
     </header>
   );
 }

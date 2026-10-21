@@ -1,3 +1,6 @@
+/* Portfolio — a type specimen: one oversized grotesque name, a book serif for
+   reading, and a single accent colour set by Header's themeColor prop. */
+
 *,
 *::before,
 *::after {
@@ -5,33 +8,68 @@
 }
 
 :root {
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --link: #2563eb;
-  --chip: #e0e7ff;
+  --paper: #f4f5f7;
+  --ink: #15171c;
+  --muted: #555b66; /* 6.4:1 on --paper */
+  --rule: #d5d9e0;
+  --accent: #2340c8; /* 7.4:1 on --paper */
+  --field: #ffffff;
+  --field-border: #868e9c; /* 3.2:1 on white */
+
+  --display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+
+  color-scheme: light;
 }
 
 :root.dark {
-  --bg: #111827;
-  --surface: #1f2937;
-  --text: #f3f4f6;
-  --muted: #9ca3af;
-  --border: #374151;
-  --link: #93c5fd;
-  --chip: #3730a3;
+  --paper: #15181e;
+  --ink: #e8eaef;
+  --muted: #a3a9b4; /* 7.6:1 on --paper */
+  --rule: #2c313b;
+  --accent: #93a8ff; /* 7.9:1 on --paper */
+  --field: #1c2028;
+  --field-border: #6b7383; /* 3.4:1 on --field */
+
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.6;
-  color: var(--text);
-  background: var(--bg);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
 }
 
 a {
-  color: var(--link);
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

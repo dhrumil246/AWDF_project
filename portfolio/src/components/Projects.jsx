@@ -2,15 +2,15 @@ function Projects({ projects }) {
   return (
     <section id="projects" className="section">
       <h2>Projects</h2>
-      <div className="cards">
+      <ol className="projects">
         {projects.map((p) => (
-          <article key={p.title} className="card">
+          <li key={p.title} className="project">
             <h3>{p.title}</h3>
-            <p>{p.description}</p>
-            <small>{p.tech}</small>
-          </article>
+            <p className="project-description">{p.description}</p>
+            <p className="project-tech">{p.tech}</p>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }

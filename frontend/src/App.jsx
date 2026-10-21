@@ -24,9 +24,9 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const APP_NAME = 'Car Details Management System';
 
 const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/cars', label: 'Cars' },
-  { to: '/add', label: 'Add Car' },
+  { to: '/', label: 'Overview' },
+  { to: '/cars', label: 'Inventory' },
+  { to: '/add', label: 'Add a car' },
   { to: '/catalog', label: 'Catalog' },
 ];
 
@@ -110,8 +110,10 @@ function App() {
 
   return (
     <>
-      <Header title={APP_NAME} subtitle="Browse and manage car inventory details" />
-      <NavBar links={navLinks} />
+      <div className="appbar">
+        <Header title="Car Details" subtitle="Management System" />
+        <NavBar links={navLinks} />
+      </div>
       <main className="container">
         <Notice notice={notice} onClose={clearNotice} />
         <Suspense fallback={<Spinner label="Loading page..." />}>

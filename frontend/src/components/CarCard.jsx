@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import Plate from './Plate';
 
 const formatPrice = (price) => `₹${price.toLocaleString('en-IN')}`;
 
@@ -10,6 +11,7 @@ function CarCard({ car, onToggleStatus, onDelete }) {
   const [busy, setBusy] = useState(false);
   const { user } = useAuth();
   const canEdit = Boolean(onDelete && user && car.owner?.id === user.id);
+  const sold = car.status === 'sold';
 
   const run = async (action) => {
     setBusy(true);
@@ -24,28 +26,42 @@ function CarCard({ car, onToggleStatus, onDelete }) {
   };
 
   return (
-    <article className="card">
+    <article className={`card${sold ? ' card-sold' : ''}`}>
       <div className="card-head">
-        <h3>
-          {car.make} {car.model}
-        </h3>
-        <span className={`badge badge-${car.status}`}>{car.status}</span>
+        <div>
+          <p className="car-make">{car.make}</p>
+          <h3 className="car-model">{car.model}</h3>
+        </div>
+        <span className={`status status-${car.status}`}>{sold ? 'Sold' : 'Available'}</span>
       </div>
-      <p className="price">{formatPrice(car.price)}</p>
-      {car.owner?.name && <p className="owner">Listed by {car.owner.id === user?.id ? 'you' : car.owner.name}</p>}
-      <button type="button" className="link-button" onClick={() => setShowDetails(!showDetails)}>
+
+      <ul className="specs" aria-label="Specifications">
+        <li>{car.year}</li>
+        <li>{car.fuelType}</li>
+        <li>{car.transmission}</li>
+      </ul>
+
+      <p className="sticker">
+        <span className="sticker-label">Asking price</span>
+        <span className="price">{formatPrice(car.price)}</span>
+      </p>
+
+      <button
+        type="button"
+        className="link-button"
+        aria-expanded={showDetails}
+        onClick={() => setShowDetails(!showDetails)}
+      >
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
       {showDetails && (
-        <>
-          <ul className="specs">
-            <li>{car.year}</li>
-            <li>{car.fuelType}</li>
-            <li>{car.transmission}</li>
-            {car.registrationNumber && <li>{car.registrationNumber}</li>}
-          </ul>
+        <div className="details">
+          {car.registrationNumber ? <Plate number={car.registrationNumber} /> : <p className="muted">Not registered yet</p>}
           {car.description && <p className="description">{car.description}</p>}
-        </>
+          {car.owner?.name && (
+            <p className="owner">Listed by {car.owner.id === user?.id ? 'you' : car.owner.name}</p>
+          )}
+        </div>
       )}
 
       {canEdit && (
@@ -54,7 +70,7 @@ function CarCard({ car, onToggleStatus, onDelete }) {
             Edit
           </Link>
           <button type="button" className="action" disabled={busy} onClick={() => run(() => onToggleStatus(car))}>
-            Mark {car.status === 'available' ? 'sold' : 'available'}
+            Mark {sold ? 'available' : 'sold'}
           </button>
           <button type="button" className="action action-danger" disabled={busy} onClick={handleDelete}>
             Delete
