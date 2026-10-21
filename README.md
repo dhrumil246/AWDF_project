@@ -33,7 +33,7 @@ Get a key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY=...` to 
 
 ```bash
 cd backend
-npm test        # 26 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
+npm test        # 30 API tests: Node's built-in test runner + supertest + in-memory MongoDB (Gemini is faked)
 npm run lint    # oxlint
 ```
 
@@ -88,7 +88,7 @@ Open http://localhost:5173 and log in. After `npm run seed` there is a demo acco
 
 ## Backend
 
-The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000). The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing.
+The API runs on the `PORT` from `.env` (5001 locally — on macOS port 5000 is taken by AirPlay Receiver; the code defaults to 5000). The server refuses to start if `MONGO_URI` or `JWT_SECRET` is missing. Set `HTTPS_KEY_FILE` and `HTTPS_CERT_FILE` (e.g. a mkcert certificate) to serve HTTPS — see [`assignments/SECURITY.md`](assignments/SECURITY.md).
 
 ### Authentication
 
@@ -130,7 +130,7 @@ Every `/cars` route also returns **401** without a valid token (missing, invalid
 Single-car responses include **`_links`** (HATEOAS): `self` and `collection` for everyone, plus `update`, `replace`, `delete` and `markSold`/`markAvailable` for the owner. `GET /` lists the API's entry points. See [`assignments/MATURITY.md`](assignments/MATURITY.md).
 | * | unknown route | – | 404 JSON |
 
-Middleware pipeline: `cors` (origins from `CLIENT_URL`) → `express.json()` → `logger` (method, URL, timestamp) → routers → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
+Middleware pipeline: `cors` (origins from `CLIENT_URL`) → `express.json()` → `sanitize` (strips `$`/`.` keys against NoSQL injection) → `logger` (method, URL, timestamp) → routers → `notFound` → `errorHandler` (last; logs the stack server-side, returns a clean JSON error).
 
 Per `/cars` request: `auth` (JWT → `req.user`) → `validateId` → `requireJson` → `validateCreateCar` / `validateUpdateCar` (400 before any database call) → controller (ownership check → 403).
 
@@ -227,6 +227,7 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | # | Week | Topic | File | Status |
 |---|---|---|---|---|
 | A1 | 4 | Richardson Maturity Model | [`assignments/MATURITY.md`](assignments/MATURITY.md) | ✅ |
+| A2 | 7 | STRIDE, HTTPS/TLS, secure coding | [`assignments/SECURITY.md`](assignments/SECURITY.md) | ✅ |
 
 ## Progress
 
