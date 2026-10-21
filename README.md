@@ -28,6 +28,8 @@ On the Add / Edit car form, **✨ Generate with AI** asks the backend for a shor
 - **Graceful degradation:** no key, invalid key, timeout (`AI_TIMEOUT_MS`, 10 s) or any Gemini error returns `200 { fallback: true }`; the form shows "AI suggestion is unavailable" and saving still works.
 - Rate limit: one request per user every `AI_RATE_LIMIT_MS` (10 s), otherwise `429` with `Retry-After`.
 
+If the default model is overloaded (Gemini answers 503 "high demand", which the app turns into the fallback), set `GEMINI_MODEL=gemini-3.5-flash-lite`.
+
 Get a key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY=...` to `backend/.env` (or the root `.env` when using Docker), then restart the backend.
 
 ## Tests and CI (Week 12)
@@ -236,6 +238,7 @@ Car data lives in `frontend/src/data/cars.js`; components never hardcode content
 | A4 | 10 | Monolith vs microservices | [`assignments/ARCHITECTURE.md`](assignments/ARCHITECTURE.md) | ✅ |
 | A5 | 11 | Cloud service models, Docker resource limits | [`assignments/CLOUD.md`](assignments/CLOUD.md) | ✅ |
 | A6 | 12 | Blue-green deployment | [`assignments/DEPLOYMENT.md`](assignments/DEPLOYMENT.md) | ✅ |
+| A7 | 13 | AI-assisted UI design (Gemini) | [`assignments/AIDESIGN.md`](assignments/AIDESIGN.md) | ✅ |
 
 ## Progress
 

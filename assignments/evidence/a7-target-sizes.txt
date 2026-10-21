@@ -1,0 +1,14 @@
+# A7 — measured target sizes (getBoundingClientRect, /cars, desktop viewport)
+# WCAG 2.2 AA (2.5.8): at least 24×24 px · WCAG 2.1 AAA (2.5.5): at least 44×44 px
+
+| Element | Before | After |
+|---|---|---|
+| Edit       | 46×30 px | 50×34 px |
+| Mark sold  | 84×30 px | 88×34 px |
+| Delete     | 63×30 px | 68×34 px |
+| Log out    | 70×30 px | (same .action rule) |
+| Nav link   | 44×30 px | unchanged |
+| Show details link | 84×22 px  ← below 24 px | 84×26 px |
+
+# Keyboard focus (after): Tab into "Make" → :focus-visible = true,
+# outline: solid 2px rgb(185, 28, 28), border-color: rgb(185, 28, 28)

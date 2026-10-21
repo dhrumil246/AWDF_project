@@ -1,0 +1,13 @@
+# Week 13 — first live call with a real GEMINI_API_KEY (backend/services/ai.js)
+# Input sent: make=Kia, model=Seltos, year=2024, fuelType=Petrol, transmission=Automatic
+
+GEMINI_MODEL=gemini-flash-latest   → FAIL in 6425 ms: Gemini responded 503: This model is currently experiencing high demand.
+GEMINI_MODEL=gemini-3.8-flash      → FAIL in 2353 ms: Gemini responded 503: This model is currently experiencing high demand.
+GEMINI_MODEL=gemini-3.5-flash-lite → OK in 2138 ms:
+  "This 2024 Kia Seltos is powered by a smooth petrol engine and features an automatic transmission for an
+   effortless driving experience. It is a fantastic choice for buyers looking for a modern and reliable vehicle.
+   Visit our dealership today to take this impressive automatic SUV for a test drive."
+
+Notes: the key is valid (503 = provider overloaded, not 401). In the app both 503s become the graceful
+"AI suggestion is unavailable" fallback. The successful answer uses only the given facts (no mileage,
+owners or price invented), 3 sentences, 49 words, as the system instruction requires.

@@ -39,7 +39,7 @@ Suggestion in the editable field with the disclaimer:
 
 ![AI suggestion](img/w13-ai-suggestion.jpg)
 
-**Still to do with a real key:** add `GEMINI_API_KEY` to `backend/.env` (or the root `.env` for Docker), restart, click the button, and screenshot a real Gemini suggestion. Everything around it — key in header, prompt, parsing, fallback — is already tested.
+**Live test with a real key** ([`w13-live-gemini.txt`](../evidence/w13-live-gemini.txt)): `gemini-flash-latest` and `gemini-3.8-flash` answered **503 "high demand"** — exactly the case graceful degradation is for. `gemini-3.5-flash-lite` answered in 2.1 s with a 3-sentence, 49-word description that used only the given facts (no invented mileage, owners or price). Set `GEMINI_MODEL=gemini-3.5-flash-lite` in `.env` while the larger models are overloaded.
 
 ## Key questions
 **Why must the AI API key be used from the backend and not directly from React?**

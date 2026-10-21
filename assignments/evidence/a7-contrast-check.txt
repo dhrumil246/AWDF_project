@@ -1,0 +1,12 @@
+ 6.47:1  #1 Delete text #b91c1c on white #ffffff (text, AA needs 4.5)
+ 1.45:1  #1 Delete border #fecaca vs white (UI boundary, 1.4.11 needs 3)
+ 6.80:1  #1 Gemini's fix: text #991b1b on #fee2e2
+ 6.15:1  #4 Sold badge text #475569 on #e2e8f0 (AA needs 4.5)
+ 9.85:1  #4 Gemini's fix: #1e293b on #cbd5e1
+ 1.23:1  #5 Input border --border #e2e8f0 vs white (1.4.11 needs 3)
+ 1.48:1  #5 Gemini's fix: border #cbd5e1 vs white
+ 4.76:1  #5 alternative: slate-500 #64748b vs white
+ 3.06:1  #5 alternative: #8a94a6 vs white
+ 6.18:1  #2 focus ring --brand #b91c1c vs page --bg #f8fafc (2.4.11 needs 3)
+ 4.55:1  Muted text --muted #64748b on --bg #f8fafc
+ 6.49:1  Badge available #166534 on #dcfce7
