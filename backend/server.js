@@ -1,4 +1,6 @@
 require('dotenv').config({ quiet: true });
+const fs = require('fs');
+const https = require('https');
 const app = require('./app');
 const connectDB = require('./config/db');
 require('./events/listeners'); // register background event handlers once
@@ -15,7 +17,16 @@ if (!process.env.JWT_SECRET) {
 }
 
 connectDB(process.env.MONGO_URI)
-  .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
+  .then(() => {
+    // HTTPS when a certificate is configured (e.g. made with mkcert), else HTTP.
+    const { HTTPS_KEY_FILE, HTTPS_CERT_FILE } = process.env;
+    if (HTTPS_KEY_FILE && HTTPS_CERT_FILE) {
+      const tls = { key: fs.readFileSync(HTTPS_KEY_FILE), cert: fs.readFileSync(HTTPS_CERT_FILE) };
+      https.createServer(tls, app).listen(PORT, () => console.log(`Server running on https://localhost:${PORT}`));
+    } else {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    }
+  })
   .catch((err) => {
     console.error(`Failed to start: ${err.message}`);
     process.exit(1);

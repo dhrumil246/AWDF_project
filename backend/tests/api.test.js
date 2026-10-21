@@ -235,6 +235,50 @@ describe('REST maturity (Assignment 1)', () => {
   });
 });
 
+describe('security (Assignment 2)', () => {
+  const User = () => mongoose.model('User');
+
+  it('rejects a NoSQL-injection login payload', async () => {
+    await registerUser();
+    const res = await request(app)
+      .post('/auth/login')
+      .send({ email: { $gt: '' }, password: { $gt: '' } });
+    assert.equal(res.status, 400);
+    assert.equal(res.body.token, undefined);
+  });
+
+  it('strips $-operator and dotted keys from request bodies', async () => {
+    const token = await registerUser();
+    const res = await request(app)
+      .post('/cars')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...kia, $where: 'sleep(5000)', 'owner.id': 'x', price: { $gt: 0 } });
+    // the operator is removed (price becomes {}), so validation rejects it: no query runs
+    assert.equal(res.status, 400);
+    assert.match(res.body.details.price, /price must be a number/);
+    assert.equal(await mongoose.model('Car').countDocuments(), 0);
+  });
+
+  it('an operator in a raw query matches any user unless sanitizeFilter is on', async () => {
+    await registerUser();
+    mongoose.set('sanitizeFilter', false);
+    const unprotected = await User().findOne({ email: { $gt: '' } });
+    mongoose.set('sanitizeFilter', true);
+
+    assert.ok(unprotected, 'without protection { $gt: "" } matches the first user');
+    // with sanitizeFilter the operator is wrapped in $eq and the query is refused
+    await assert.rejects(User().findOne({ email: { $gt: '' } }), { name: 'CastError' });
+  });
+
+  it('never returns password hashes', async () => {
+    const token = await registerUser();
+    const me = await request(app).get('/auth/me').set('Authorization', `Bearer ${token}`);
+    assert.equal(me.body.password, undefined);
+    const stored = await User().findOne({ email: 'demo@cars.test' }).select('+password');
+    assert.match(stored.password, /^\$2[aby]\$10\$/); // bcrypt hash, cost 10
+  });
+});
+
 describe('ai descriptions', () => {
   const realFetch = globalThis.fetch;
   const body = { make: 'Kia', model: 'Seltos', year: 2024, fuelType: 'Petrol', registrationNumber: 'GJ01KZ4321' };

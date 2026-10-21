@@ -1,0 +1,30 @@
+# A2 — HTTPS (local certificate) and injection checks
+# Server started with HTTPS_KEY_FILE / HTTPS_CERT_FILE set; log line: Server running on https://localhost:5001
+# Certificate: self-signed for CN=localhost, SAN localhost + 127.0.0.1 (same shape as mkcert's; mkcert additionally makes the OS trust it)
+
+$ curl --cacert localhost.pem -v https://localhost:5001/   (TLS details)
+ALPN: curl offers h2,http/1.1
+SSL connection using TLSv1.3 / AEAD-AES256-GCM-SHA384 / [blank] / UNDEF
+ALPN: server accepted http/1.1
+subject: CN=localhost
+issuer: CN=localhost
+SSL certificate verify ok.
+< HTTP/1.1 200 OK
+{"message":"Car Details API is running","_links":{"self":{"href":"/","method":"GET"},"register":{"href":"/auth/register","method":"POST"},"login":{"href":"/auth/login","method":"POST"},"me":{"href":"/auth/me","method":"GET"},"cars":{"href":"/cars","method":"GET"},"createCar":{"href":"/cars","method":"POST"},"generateDescription":{"href":"/api/ai/generate-description","method":"POST"}}}
+
+
+$ curl https://localhost:5001/   (no trusted CA given → the client refuses the certificate)
+exit=60 SSL certificate problem: self signed certificate
+
+$ curl http://localhost:5001/   (plain HTTP to the HTTPS port)
+exit=52 http_code=000 Empty reply from server
+
+$ register + login over HTTPS
+register [201]
+login    [200]
+
+$ NoSQL injection attempt: POST /auth/login {"email":{"$gt":""},"password":{"$gt":""}}
+{"error":"Validation failed","details":{"email":"email must be a non-empty string","password":"password must be a non-empty string"}} [400]
+
+$ NoSQL injection attempt: POST /auth/login {"email":"demo@cars.test","password":{"$ne":null}}
+{"error":"Validation failed","details":{"password":"password must be a non-empty string"}} [400]

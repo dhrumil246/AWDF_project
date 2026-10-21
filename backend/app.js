@@ -1,7 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const logger = require('./middleware/logger');
 const notFound = require('./middleware/notFound');
+const sanitize = require('./middleware/sanitize');
 const errorHandler = require('./middleware/errorHandler');
 const authRouter = require('./routes/auth');
 const carsRouter = require('./routes/cars');
@@ -9,14 +11,19 @@ const aiRouter = require('./routes/ai');
 const { cache } = require('./cache');
 const { rootLinks } = require('./links');
 
+// Second NoSQL-injection layer: Mongoose wraps any $-operator found in a
+// query filter value in $eq, so it is matched literally.
+mongoose.set('sanitizeFilter', true);
+
 const app = express();
 
 // Allow the React dev server (or the origins listed in CLIENT_URL) to call the API.
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map((o) => o.trim());
 
-// Middleware pipeline: CORS → body parsing → logging → routes → 404 → error handler (last)
+// Middleware pipeline: CORS → body parsing → sanitize → logging → routes → 404 → error handler (last)
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+app.use(sanitize);
 app.use(logger);
 
 app.get('/', (req, res) => res.json({ message: 'Car Details API is running', _links: rootLinks }));
