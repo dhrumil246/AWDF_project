@@ -11,8 +11,10 @@ car-details-management-system/
 ├── deploy/blue-green/ blue-green deployment (two backends + nginx switch)
 ├── frontend/          React (Vite), Dockerfile, nginx.conf
 ├── backend/           Node.js + Express REST API, Dockerfile
+├── portfolio/         Week 1–2 student portfolio (Lab Manual Practicals 1–3), imported with its history
 ├── assignments/       assignment write-ups (MATURITY.md, …) and their evidence
 └── docs/
+    ├── plans/         13-week build roadmap
     ├── lab-journal/   weekly notes, key-question answers, screenshots
     ├── evidence/      recorded API responses and server logs
     └── postman/       Postman collection for the API
@@ -227,6 +229,16 @@ main.jsx (BrowserRouter → AuthProvider)
 ```
 
 Car data lives in `frontend/src/data/cars.js`; components never hardcode content.
+
+## Student portfolio (`portfolio/`)
+
+The Lab Manual's first practicals build a separate React portfolio (`portfolio-<rollno>`). It is kept here in `portfolio/` with its own README and Week 1–2 lab journals:
+
+```bash
+cd portfolio
+npm install
+npm run dev
+```
 
 ## Assignments
 
